@@ -15,6 +15,7 @@ These files are instructions and planning artifacts, **not** a completed firmwar
 ## Foundation code
 
 - `docs/DEVELOPMENT_SETUP.md` — Mac setup, what was installed, and commands that were actually run.
+- `docs/CURSOR_SETUP.md` — open the repo in Cursor, select `.venv`, run the tests from the Testing panel.
 - `firmware/` — ESP-IDF skeleton for ESP32-S3. Heartbeat log only. Not built or flashed here.
 - `python/` — synthetic signal-processing harness and pytest suite. No serial port and no measured data.
 - `data/synthetic/` and `data/measured/` — synthetic output versus future recordings. Measured is empty.

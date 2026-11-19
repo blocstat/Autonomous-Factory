@@ -38,12 +38,18 @@ python -m pytest python
 python python/scripts/preview_synthetic.py
 ```
 
-Expected preview paths, both marked synthetic:
+Expected preview paths, all marked synthetic:
 
 ```text
 data/synthetic/out/preview.csv
 data/synthetic/out/preview.png
+data/synthetic/out/fan_baseline.csv
+data/synthetic/out/fan_baseline.png
+data/synthetic/out/fan_imbalance.csv
+data/synthetic/out/fan_imbalance.png
 ```
+
+The `fan_*` files are a computed fan-like signal (25 Hz shaft, 7-blade pass at 175 Hz, 4 kHz sample rate), with and without extra 1x amplitude standing in for imbalance. They are test signals, not a physical model of a fan.
 
 `pytest` does not need those files. It writes its own preview into a temporary directory.
 
@@ -105,3 +111,29 @@ Installed into `.venv`: pip 26.3, NumPy 2.5.5, SciPy 1.18.1, Matplotlib 3.11.2, 
 | `.venv/bin/python python/scripts/preview_synthetic.py` | Exit 0. Printed `data_origin=synthetic` and wrote `data/synthetic/out/preview.csv` and `data/synthetic/out/preview.png`. |
 
 The first line of `preview.csv` is `# data_origin: synthetic`. The following header line is `# not_a_sensor_measurement: true`. The PNG title is `SYNTHETIC — not a sensor measurement`. These files are generated output, not a recording. No `fan_baseline` or `fan_imbalance` file was produced. Nothing was flashed.
+
+## Verification record — 19 November 2026 (Phase 0, V0 known-answer tests)
+
+Added to `python/`:
+
+- `af_signal/synthetic.py`: `generate_fan_vibration()`, a synthetic 1x shaft + harmonics + blade-pass + optional impulses + noise signal. Imbalance is modelled only as extra 1x amplitude.
+- `af_signal/features.py`: `peak_to_peak` in `time_domain_features()`, plus `kurtosis()` and `band_rms()`.
+- `af_signal/preview.py`: optional `stem` argument; CSV header now lists components and impulses.
+- `tests/test_known_answers.py`: the V0 known-answer tests from `docs/SYSTEMS_ENGINEERING_REVIEW.md` section 6.3, plus one more preview test.
+
+These runs were made by Claude in a Linux cloud container, **not on the Mac**: Python 3.13, NumPy 2.5.5, SciPy 1.18.1, Matplotlib 3.11.2, pytest 8.4.2.
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q` (from `python/`) | Exit 0. `32 passed in 3.84s` on the Phase 0 branch alone; `46 passed in 7.91s` after rebasing onto `main` with the stdlib window-check tests. |
+| `python python/scripts/preview_synthetic.py` | Exit 0. Wrote `preview`, `fan_baseline` and `fan_imbalance` CSV/PNG; every CSV header starts `data_origin: synthetic`. |
+
+Not yet run on the Mac (Python 3.11). To confirm there, from the repository root:
+
+```bash
+source .venv/bin/activate
+python -m pytest python -q          # expect 46 passed
+python python/scripts/preview_synthetic.py
+```
+
+All data in these tests is synthetic. Passing them shows the feature code is correct on known signals; it says nothing about real sensors or machines.

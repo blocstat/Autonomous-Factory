@@ -24,6 +24,26 @@ Every section separates three kinds of statement:
 
 ---
 
+## 1b. Feasibility verdict and coverage of the first assignment
+
+**Technical feasibility (recommendation, my judgement, not a test result):** an ESP32-S3 plus a digital MEMS accelerometer streaming raw data over USB, with analysis on the Mac, is feasible for a solo founder at ~14 h/week. The parts are mainstream and well documented. What is not established is whether the result is *useful*: that depends on mounting quality, the ~1 kHz bandwidth limit (A2) and, above all, on customers (A1). Treat the MVP as a technical and learning milestone; it is not yet evidence of a product.
+
+**Where each step of the first assignment is answered:**
+
+| Assignment step | Section |
+|---|---|
+| 1. Feasibility of the ESP32-S3 MVP | 1b (this section), 1, 2 |
+| 2. Highest-risk technical assumptions | 3 |
+| 3. Minimum sensor and hardware architecture | 4.1, 5.2 |
+| 4. Safe first experiment without industrial machinery | 4.2 |
+| 5. Firmware, acquisition and signal-processing architecture | 5, 6.1, 6.2 |
+| 6. Validation before machine learning | 6.3 |
+| 7. 14-hour sprint plan | 7 |
+
+Facts, assumptions and recommendations are labelled separately throughout. The architecture is challenged, not endorsed: sections 2.2 and 3 propose removing the PT100, on-device FFT, MQTT, PostgreSQL and Grafana from the first build. Nothing has been implemented.
+
+---
+
 ## 2. Architecture challenge
 
 ### 2.1 Proposed pipeline (fact, from MASTER_CONTEXT)
