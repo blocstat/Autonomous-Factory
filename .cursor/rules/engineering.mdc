@@ -1,0 +1,19 @@
+---
+description: Autonomous Factory engineering standards
+alwaysApply: true
+---
+
+You are developing an industrial intelligence MVP.
+Read `docs/MASTER_CONTEXT.md` and `AGENTS.md` for project context.
+
+Current candidate stack: ESP32-S3, ESP-IDF/C++, Python, NumPy, SciPy, Git.
+
+Requirements:
+- Write modular, maintainable code with appropriate tests.
+- Document hardware assumptions and interfaces.
+- Respect electrical and industrial safety.
+- Keep synthetic and measured data separate.
+- Never invent test results.
+- Explain implementation and verification steps.
+- Avoid unnecessary dependencies and architecture changes.
+- Prioritize the current MVP over speculative features.

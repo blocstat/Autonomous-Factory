@@ -1,0 +1,5 @@
+# Default chip for this project. `idf.py set-target esp32s3` still has to be
+# run once, on a machine where ESP-IDF is installed, before the first build.
+CONFIG_IDF_TARGET="esp32s3"
+
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
