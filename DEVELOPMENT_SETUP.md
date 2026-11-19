@@ -89,3 +89,19 @@ Commands were run from the repository root with `.venv/bin/python` (Homebrew Pyt
 | `idf.py set-target esp32s3` and `idf.py build` | Not run. Toolchain absent. |
 
 The preview CSV header contains `data_origin: synthetic` and `not_a_sensor_measurement: true`. The PNG title reads `SYNTHETIC — not a sensor measurement`. These files are generated output, not a recording. No board was connected and nothing was flashed.
+
+## Verification record — 19 November 2026
+
+This run was on a Linux host (`Linux 6.12.113+ x86_64`), not the MacBook above. `/opt/homebrew/bin/python3.11` and `python3.11` were absent. `/usr/bin/python3` is Python 3.12.3. `python3 -m venv .venv` failed until `python3.12-venv` was installed with apt, because `ensurepip` was missing. The venv was then created with that Python 3.12.3. No packages were added beyond `python/requirements.txt`. No test was edited. No serial port was opened.
+
+Installed into `.venv`: pip 26.3, NumPy 2.5.5, SciPy 1.18.1, Matplotlib 3.11.2, pytest 8.4.2.
+
+| Command | Result |
+| --- | --- |
+| `python3 -m venv .venv` after installing `python3.12-venv` | Exit 0. Interpreter `.venv/bin/python` is Python 3.12.3. |
+| `.venv/bin/python -m pip install --upgrade pip` | Exit 0. pip 26.3. |
+| `.venv/bin/python -m pip install -r python/requirements.txt` | Exit 0. Versions listed above, in `.venv` only. |
+| `.venv/bin/python -m pytest python -q` | Exit 0. `27 passed in 1.53s`. |
+| `.venv/bin/python python/scripts/preview_synthetic.py` | Exit 0. Printed `data_origin=synthetic` and wrote `data/synthetic/out/preview.csv` and `data/synthetic/out/preview.png`. |
+
+The first line of `preview.csv` is `# data_origin: synthetic`. The following header line is `# not_a_sensor_measurement: true`. The PNG title is `SYNTHETIC — not a sensor measurement`. These files are generated output, not a recording. No `fan_baseline` or `fan_imbalance` file was produced. Nothing was flashed.
