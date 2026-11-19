@@ -12,15 +12,15 @@ from af_signal.synthetic import SyntheticWaveform
 
 
 def write_synthetic_preview(
-    output_dir: Path, waveform: SyntheticWaveform
+    output_dir: Path, waveform: SyntheticWaveform, stem: str = "preview"
 ) -> tuple[Path, Path]:
-    """Write `preview.csv` and `preview.png` under `output_dir`."""
+    """Write `<stem>.csv` and `<stem>.png` under `output_dir`."""
     if waveform.data_origin != DATA_ORIGIN_SYNTHETIC:
         raise ValueError("refusing to write a preview that is not synthetic")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    csv_path = output_dir / "preview.csv"
-    png_path = output_dir / "preview.png"
+    csv_path = output_dir / f"{stem}.csv"
+    png_path = output_dir / f"{stem}.png"
     _write_csv(csv_path, waveform)
     _write_png(png_path, waveform)
     return csv_path, png_path
@@ -38,6 +38,10 @@ def _write_csv(path: Path, waveform: SyntheticWaveform) -> None:
             f"amplitude_synthetic: {waveform.amplitude}",
             f"noise_std_synthetic: {waveform.noise_std}",
             f"seed: {waveform.seed}",
+            "components_hz_amplitude_synthetic: "
+            + ("; ".join(f"{f:g} Hz x {a:g}" for f, a in waveform.components) or "none"),
+            f"impulse_rate_hz: {waveform.impulse_rate_hz}",
+            f"impulse_amplitude_synthetic: {waveform.impulse_amplitude}",
             "columns: time_s, synthetic_amplitude",
         ]
     )
