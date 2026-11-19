@@ -132,8 +132,21 @@ Not yet run on the Mac (Python 3.11). To confirm there, from the repository root
 
 ```bash
 source .venv/bin/activate
-python -m pytest python -q          # expect 46 passed
+python -m pytest python -q          # expect 58 passed (46 before the phone loader was added)
 python python/scripts/preview_synthetic.py
 ```
 
 All data in these tests is synthetic. Passing them shows the feature code is correct on known signals; it says nothing about real sensors or machines.
+
+## Verification record — 19 November 2026 (Phase 0b, phone capture loader)
+
+Added `python/af_signal/phone.py` (phyphox CSV loader, sample-rate statistics, resampling), `python/scripts/analyze_phone.py`, `python/tests/test_phone.py`, and `docs/PHASE0B_PHONE_SESSION.md`. No new dependencies. The test CSVs are synthetic fixtures written in phyphox's format inside a temporary directory; no phone data was used.
+
+Run by Claude in a Linux cloud container (Python 3.13, NumPy 2.5.5, SciPy 1.18.1, Matplotlib 3.11.2, pytest 8.4.2), not on the Mac:
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q` (from `python/`) | Exit 0. `58 passed in 3.12s`. |
+| `analyze_phone.py` on one synthetic fixture, `--shaft-hz 20` | Exit 0. Reported `median_rate_hz 400.66`, `z_peak_hz 20.02`; summary first line `# data_origin: phone`. |
+
+No real phone capture has been analysed yet.

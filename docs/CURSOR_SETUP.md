@@ -29,7 +29,7 @@ How to open this repository in Cursor on the MacBook and run the synthetic signa
   python -m pytest python -q
   ```
 
-  **Expected:** `46 passed`. If you see a different number, write down the actual output; don't assume the expected one.
+  **Expected:** `58 passed`. If you see a different number, write down the actual output; don't assume the expected one.
 
 ## Generate the synthetic previews
 
