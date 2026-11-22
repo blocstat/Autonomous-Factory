@@ -132,8 +132,32 @@ Not yet run on the Mac (Python 3.11). To confirm there, from the repository root
 
 ```bash
 source .venv/bin/activate
-python -m pytest python -q          # expect 46 passed
+python -m pytest python -q          # expect 58 passed (46 before the phone loader was added)
 python python/scripts/preview_synthetic.py
 ```
 
 All data in these tests is synthetic. Passing them shows the feature code is correct on known signals; it says nothing about real sensors or machines.
+
+## Verification record — 19 November 2026 (Phase 0b, phone capture loader)
+
+Added `python/af_signal/phone.py` (phyphox CSV loader, sample-rate statistics, resampling), `python/scripts/analyze_phone.py`, `python/tests/test_phone.py`, and `docs/PHASE0B_PHONE_SESSION.md`. No new dependencies. The test CSVs are synthetic fixtures written in phyphox's format inside a temporary directory; no phone data was used.
+
+Run by Claude in a Linux cloud container (Python 3.13, NumPy 2.5.5, SciPy 1.18.1, Matplotlib 3.11.2, pytest 8.4.2), not on the Mac:
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q` (from `python/`) | Exit 0. `58 passed in 3.12s`. |
+| `analyze_phone.py` on one synthetic fixture, `--shaft-hz 20` | Exit 0. Reported `median_rate_hz 400.66`, `z_peak_hz 20.02`; summary first line `# data_origin: phone`. |
+
+At the time of this record no real phone capture had been analysed. Real captures were analysed later; see `docs/PHASE0B_RESULTS_2026-11-20.md` and `docs/PHASE0B_RESULTS_2026-11-22.md`.
+
+## Verification record — 22 November 2026 (first test run on the Mac)
+
+Run by Rami on the MacBook Pro in Cursor's terminal, branch `phase0b-phone-capture`, project `.venv` (Python 3.11), from the repository root. Reported to Claude with a screenshot of the terminal.
+
+| Command | Result |
+| --- | --- |
+| `python -m pip install -r python/requirements.txt` | All requirements already satisfied. |
+| `python -m pytest python -q` | `58 passed in 2.91s`. |
+
+This is the first confirmation on the Mac that the Phase 0 and Phase 0b tests pass. The tests use synthetic data and synthetic phone-format fixtures only.
