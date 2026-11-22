@@ -67,6 +67,8 @@ Bold marks captures with a large spike (kurtosis far above 3). A spike raises th
 
 ## Next session (about 1 hour)
 
+Done on 22 November with a stiffer mount; see `docs/PHASE0B_RESULTS_2026-11-22.md`.
+
 1. **Stiff mount:** phone out of its case, on the solid frame edge of the pad, not on the mesh. Tape the outline.
 2. **Tap test:** fans off, tap the mesh lightly once during a capture. If 63–68 Hz appears, it's the panel.
 3. **One fan at a time** if the pad allows it, three baselines each.
