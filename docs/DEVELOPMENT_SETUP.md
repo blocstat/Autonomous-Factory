@@ -149,4 +149,15 @@ Run by Claude in a Linux cloud container (Python 3.13, NumPy 2.5.5, SciPy 1.18.1
 | `python -m pytest -q` (from `python/`) | Exit 0. `58 passed in 3.12s`. |
 | `analyze_phone.py` on one synthetic fixture, `--shaft-hz 20` | Exit 0. Reported `median_rate_hz 400.66`, `z_peak_hz 20.02`; summary first line `# data_origin: phone`. |
 
-No real phone capture has been analysed yet.
+At the time of this record no real phone capture had been analysed. Real captures were analysed later; see `docs/PHASE0B_RESULTS_2026-11-20.md` and `docs/PHASE0B_RESULTS_2026-11-22.md`.
+
+## Verification record — 22 November 2026 (first test run on the Mac)
+
+Run by Rami on the MacBook Pro in Cursor's terminal, branch `phase0b-phone-capture`, project `.venv` (Python 3.11), from the repository root. Reported to Claude with a screenshot of the terminal.
+
+| Command | Result |
+| --- | --- |
+| `python -m pip install -r python/requirements.txt` | All requirements already satisfied. |
+| `python -m pytest python -q` | `58 passed in 2.91s`. |
+
+This is the first confirmation on the Mac that the Phase 0 and Phase 0b tests pass. The tests use synthetic data and synthetic phone-format fixtures only.
