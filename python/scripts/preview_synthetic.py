@@ -10,7 +10,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from af_signal.preview import write_synthetic_preview
-from af_signal.synthetic import generate_tone
+from af_signal.synthetic import generate_fan_vibration, generate_tone
 
 
 def main() -> None:
@@ -29,6 +29,18 @@ def main() -> None:
     print(f"data_origin={waveform.data_origin}")
     print(csv_path)
     print(png_path)
+
+    # Fan-like pair: same signal with and without extra 1x (imbalance).
+    for stem, imbalance in (("fan_baseline", 0.0), ("fan_imbalance", 0.3)):
+        fan = generate_fan_vibration(
+            imbalance_amplitude=imbalance,
+            harmonic_amplitudes=(0.05,),
+            noise_std=0.05,
+            seed=1,
+            description=f"synthetic fan-like signal, imbalance_amplitude={imbalance}",
+        )
+        for path in write_synthetic_preview(output_dir, fan, stem=stem):
+            print(path)
 
 
 if __name__ == "__main__":
