@@ -161,3 +161,14 @@ Run by Rami on the MacBook Pro in Cursor's terminal, branch `phase0b-phone-captu
 | `python -m pytest python -q` | `58 passed in 2.91s`. |
 
 This is the first confirmation on the Mac that the Phase 0 and Phase 0b tests pass. The tests use synthetic data and synthetic phone-format fixtures only.
+
+## Verification record — 22 November 2026 (Phase 1 firmware, build only)
+
+Firmware for ADXL355 bring-up (`firmware/main/`, guide in `docs/PHASE1_BRINGUP.md`). Built by Claude in a Linux cloud container, **not on the Mac and not on a board**. ESP-IDF v6.1.1 was cloned from GitHub; its Python environment was installed with `idf_tools.py install-python-env --no-constraints` because the container could not reach dl.espressif.com for the constraints file.
+
+| Command | Result |
+| --- | --- |
+| `idf.py set-target esp32s3` then `idf.py build` (in `firmware/`) | Exit 0, no compiler warnings. `Project build complete`. `af_monitor.bin` is 0x2e670 bytes, 82 % of the 1 MB app partition free. Flash size 16MB. |
+| `c++ -std=c++17 -Wall -Wextra -I firmware/main firmware/test/host/test_adxl355_decode.cpp -o /tmp/test_adxl355_decode && /tmp/test_adxl355_decode` (g++ 13.3) | 9 known-answer checks on hand-made byte patterns, `all passed`. |
+
+Nothing was flashed and no sensor was read. The ID check and the gravity check in `docs/PHASE1_BRINGUP.md` are the first hardware tests and have not been run yet.
