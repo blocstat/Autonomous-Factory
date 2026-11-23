@@ -185,3 +185,16 @@ Run by Rami on the MacBook Pro, reported to Claude as terminal output. Branch `p
 
 Step 1 (toolchain, build, flash, log) passed. The ADXL355 had not been wired; no sensor data exists yet.
 
+## Verification record — 22 November 2026 (Phase 1 step 2: first ADXL355 readings)
+
+Run by Rami on the second ESP32-S3 board of the pack (the first had our firmware from step 1; this one still had the factory `led_strip` demo and was flashed first). EVAL-ADXL355-PMDZ wired as in `docs/PHASE1_BRINGUP.md`. Output saved in `data/measured/adxl355/raw/20261122-2246_adxl355_bringup-static_board-flat.txt` (`data_origin: adxl355`).
+
+| Check | Result |
+| --- | --- |
+| ID registers | `devid_ad=0xAD, devid_mst=0x1D, partid=0xED, revid=0x01`, `result=PASS`. Matches the data sheet. |
+| Gravity at rest, 16 readings | Mean x 0.1145 g, y −0.0177 g, z 0.9914 g. Total 0.9982 g (0.9959–1.0055). Within the ±8 % tolerance; the x and y values are a tilt of about 6.7°. |
+| Stability | Standard deviation x 0.0005 g, y 0.0010 g, z 0.0022 g at 1 reading/s. One z reading of 0.9989 (14090 ms) stands out; possibly a touch. |
+| Temperature | 26.0–26.4 °C, uncalibrated. |
+
+The SPI wiring, settings and data decoding work on real hardware. Sample rate, noise density and vibration response are not tested yet (step 3).
+

@@ -102,7 +102,7 @@ idf.py -p /dev/cu.usbmodem1101 monitor
 | Check | Pass | If it fails |
 | --- | --- | --- |
 | **ID** | `AF,id,devid_ad=0xAD,devid_mst=0x1D,partid=0xED,…,result=PASS` | All `0x00` or all `0xFF`: power or MISO/CS problem. Check 3V3, GND, MISO, CS. Mixed wrong values: SCLK/MOSI swapped or a loose wire. The firmware retries every 2 s, so you can fix a wire (with USB unplugged) and replug. |
-| **Gravity, board flat on the table** | One axis (usually z) reads about **±1.0 g** (0.92–1.08 allowed by the ±8 % tolerance); the other two read within **±0.1 g** of 0 | Turn the sensor board on its side: the 1 g should move to another axis. If nothing changes, write down what you see. |
+| **Gravity, sensor at rest** | The total, √(x² + y² + z²), is **1.0 g** within 0.92–1.08 (the ±8 % tolerance), with most of it on one axis. Small values on the other axes are tilt: a Pmod board held by its jumper wires rarely sits level (0.1 g is about 6°). | Turn the sensor board on its side: the 1 g should move to another axis. If nothing changes, write down what you see. |
 | **Temperature** | Between 15 and 40 °C, and roughly room temperature | Write it down; it is uncalibrated. |
 | **Stability** | Readings change by less than about 0.01 g between lines while nothing is touched | Write down the spread. |
 

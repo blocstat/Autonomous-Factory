@@ -1,0 +1,24 @@
+# data_origin: adxl355
+# EVAL-ADXL355-PMDZ on ESP32-S3 (DIYmall DevKitC-1 copy, XH-S3E N16R8), SPI2 1 MHz.
+# Firmware af_monitor, branch phase1-adxl355-bringup. 1 reading per second, +/-2 g range,
+# 256,000 LSB/g typical (uncalibrated, +/-8 % scale tolerance). Sensor at rest on a desk.
+# Copied by Rami from the idf.py monitor output on 2026-11-22 22:46 America/Toronto.
+# The first characters of the first line were cut in the copy ("F,id" instead of "AF,id").
+AF,id,devid_ad=0xAD,devid_mst=0x1D,partid=0xED,revid=0x01,result=PASS
+AF,columns,uptime_ms,x_g,y_g,z_g,temp_c
+AF,sample,90,0.1142,-0.0176,0.9919,26.3
+AF,sample,1090,0.1150,-0.0180,0.9922,26.4
+AF,sample,2090,0.1144,-0.0180,0.9920,26.3
+AF,sample,3090,0.1150,-0.0180,0.9912,26.3
+AF,sample,4090,0.1139,-0.0180,0.9900,26.1
+AF,sample,5090,0.1149,-0.0184,0.9910,26.0
+AF,sample,6090,0.1146,-0.0179,0.9900,26.2
+AF,sample,7090,0.1142,-0.0147,0.9892,26.3
+AF,sample,8090,0.1151,-0.0181,0.9894,26.1
+AF,sample,9090,0.1148,-0.0181,0.9915,26.2
+AF,sample,10090,0.1150,-0.0177,0.9919,26.1
+AF,sample,11090,0.1146,-0.0174,0.9897,26.1
+AF,sample,12090,0.1137,-0.0172,0.9909,26.2
+AF,sample,13090,0.1145,-0.0174,0.9923,26.2
+AF,sample,14090,0.1137,-0.0196,0.9989,26.2
+AF,sample,15090,0.1149,-0.0172,0.9909,26.3
