@@ -182,7 +182,7 @@ To re-check saved files later: `python python/scripts/analyze_adxl355.py data/me
 | **SPI errors** | 0 | A loose wire. Unplug USB, check the step 2 wiring, repeat. |
 | **Output data rate** | 3,944–4,056 Hz (4,000 Hz ±1.4 %, the data sheet's clock tolerance) | Write down the value. Outside this range means the rate is not what we think it is; stop and report it. |
 | **Gravity at rest** | Total 0.92–1.08 g, as in step 2 | Same as step 2. |
-| **x, y, z noise density** | Median from 10 to 800 Hz between 11 and 45 µg/√Hz (half to twice the data sheet's typical 22.5) | Above 45 shows as **CHECK**: almost always vibration from the room or desk, not the sensor. Look at the plot for peaks, move the board to a heavier surface (floor tile, kitchen counter) and repeat. Below 11 is a **FAIL**: the data is probably stuck or wrong. |
+| **x, y, z noise density** | Median from 10 to 800 Hz between 5 and 45 µg/√Hz (the data sheet's typical is 22.5; the first board measured 12–17) | Above 45 shows as **CHECK**: almost always vibration from the room or desk, not the sensor. Look at the plot for peaks, move the board to a heavier surface (floor tile, kitchen counter) and repeat. Below 5 is a **FAIL**: the data is probably stuck or wrong. |
 | **Temperature** | 15–40 °C | Uncalibrated; write it down. |
 
 **Step 3 passes** when all three captures say `OVERALL: PASS` (or `CHECK` only on noise, with a peak you can explain). The three captures should agree with each other on noise within about 20 %.

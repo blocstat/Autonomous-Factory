@@ -212,3 +212,27 @@ Streaming firmware, Python reader, capture and analysis scripts (branch `phase1-
 
 The 921,600 baud stream, the sample rate, and the noise floor have not been run on hardware yet. Those are the step 3 checks.
 
+## Verification record — 23 November 2026 (Phase 1 step 3 on the board: 4 kHz stream and noise floor)
+
+Run by Rami on the MacBook Pro and the board that passed step 2, branch `phase1-adxl355-stream` (8cfd1d7), flashed on `/dev/cu.usbserial-0001`. Three 30 s captures at rest, board flat on the desk, fans off, 10:40–10:43 America/Toronto. Files: `data/measured/adxl355/raw/20261123-1040…r1.csv`, `…1041…r2.csv`, `…1042…r3.csv` (`data_origin: adxl355`, raw counts, uncalibrated). Checked by Claude with `python python/scripts/analyze_adxl355.py data/measured/adxl355/raw/*_rest_*.csv`.
+
+| Check | r1 | r2 | r3 |
+| --- | --- | --- | --- |
+| Sets received, missing | 125,248, 0 | 125,312, 0 | 125,376, 0 |
+| CRC errors, FIFO overruns, dropped words, SPI errors | 0, 0, 0, 0 | 0, 0, 0, 0 | 0, 0, 0, 0 |
+| Output data rate (from the ESP32 timer) | 4010.3 Hz | 4010.2 Hz | 4010.3 Hz |
+| Mean x, y, z | −0.0337, +0.0344, +0.9947 g | same | −0.0338, +0.0344, +0.9947 g |
+| Gravity (total) | 0.9959 g | 0.9959 g | 0.9959 g |
+| Noise density x, y, z (median 10–800 Hz) | 12.5, 12.0, 16.5 µg/√Hz | 12.6, 12.0, 16.3 | 12.4, 12.1, 16.5 |
+| Temperature (last status line) | 25.9 °C | 26.1 °C | 26.0 °C |
+| Result | PASS | PASS | PASS |
+
+What this shows:
+
+- Every sample arrived: 0 lost sets and 0 corrupted frames in about 376,000 sets. The 7,900 skipped bytes at the start of each capture are the boot messages at 115,200 baud, as expected.
+- The sensor's own clock runs at 4010.3 Hz, 0.26 % fast, within the data sheet's ±1.4 %, and the same in all three captures. Frequency axes must use the measured rate (the capture file records it), not 4000 Hz.
+- The noise floor is flat at about 12–13 µg/√Hz on x and y and 16–17 on z from 50 to 500 Hz, then falls above about 600 Hz (the 1,000 Hz low-pass filter). That is below the data sheet's typical 22.5 µg/√Hz. The data is live (about 900 distinct x values per capture, filter roll-off and room vibration visible), so this is a quiet unit, not stuck data. The three captures agree within 2 %.
+- Below 50 Hz the desk and building add vibration: peaks of 60–240 µg/√Hz at 5–20 Hz (all axes) and 40–45 Hz and about 90 Hz (z). Those come from the environment, not the sensor, and set the real floor for low-frequency measurements on this desk.
+
+After seeing this data the stuck-data limit for noise was lowered from 11 to 5 µg/√Hz (y measured 12.0, too close to 11). All three captures passed under the original limits as well.
+
