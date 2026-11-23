@@ -26,8 +26,10 @@ constexpr uint8_t DEVID_MST = 0x01;
 constexpr uint8_t PARTID = 0x02;
 constexpr uint8_t REVID = 0x03;
 constexpr uint8_t STATUS = 0x04;
+constexpr uint8_t FIFO_ENTRIES = 0x05;
 constexpr uint8_t TEMP2 = 0x06;
 constexpr uint8_t XDATA3 = 0x08;
+constexpr uint8_t FIFO_DATA = 0x11;
 constexpr uint8_t FILTER = 0x28;
 constexpr uint8_t RANGE = 0x2C;
 constexpr uint8_t POWER_CTL = 0x2D;
@@ -38,6 +40,14 @@ constexpr uint8_t EXPECTED_DEVID_AD = 0xAD;
 constexpr uint8_t EXPECTED_DEVID_MST = 0x1D;
 constexpr uint8_t EXPECTED_PARTID = 0xED;
 constexpr uint8_t RESET_CODE = 0x52;
+
+// STATUS bits (data sheet, Table 20). Reading STATUS clears FIFO_OVR.
+constexpr uint8_t STATUS_DATA_RDY = 0x01;
+constexpr uint8_t STATUS_FIFO_FULL = 0x02;
+constexpr uint8_t STATUS_FIFO_OVR = 0x04;
+
+// The FIFO holds 96 single-axis words (32 x/y/z sets).
+constexpr size_t FIFO_WORDS = 96;
 
 // Typical sensitivity in the +/-2 g range. The data sheet allows
 // 235,520 to 276,480 LSB/g, so readings in g are good to about +/-8 %
@@ -75,8 +85,21 @@ public:
     esp_err_t start_measurement();
     esp_err_t read_sample(RawSample &sample);
 
+    // Reads STATUS and FIFO_ENTRIES in one transfer.
+    esp_err_t read_status_and_entries(uint8_t &status, uint8_t &entries);
+
+    // Reads `n_words` 3-byte words from FIFO_DATA in one transfer (the
+    // address does not auto-increment on FIFO_DATA, so a multi-byte read
+    // keeps popping the FIFO). `out` gets 3 * n_words bytes.
+    esp_err_t read_fifo(uint8_t *out, size_t n_words);
+
+    // Reads the 12-bit temperature code.
+    esp_err_t read_temperature(uint16_t &raw);
+
 private:
     spi_device_handle_t handle_ = nullptr;
+    uint8_t *dma_tx_ = nullptr;
+    uint8_t *dma_rx_ = nullptr;
 };
 
 }  // namespace adxl355

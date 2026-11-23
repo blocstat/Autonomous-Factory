@@ -7,3 +7,8 @@ CONFIG_LOG_DEFAULT_LEVEL_INFO=y
 # Board: DIYmall ESP32-S3-DevKitC-1 copy with a Sparkle IoT XH-S3E N16R8
 # module (16 MB flash, 8 MB PSRAM). PSRAM is not used yet.
 CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+
+# Step 3 streaming: 1 ms scheduler tick so the FIFO (8 ms deep at 4000 Hz)
+# is read every millisecond. (The 921600 baud stream rate is set in
+# main.cpp; the boot log stays at the default 115200.)
+CONFIG_FREERTOS_HZ=1000

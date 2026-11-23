@@ -198,3 +198,17 @@ Run by Rami on the second ESP32-S3 board of the pack (the first had our firmware
 
 The SPI wiring, settings and data decoding work on real hardware. Sample rate, noise density and vibration response are not tested yet (step 3).
 
+## Verification record — 23 November 2026 (Phase 1 step 3 firmware and capture tools, build and tests only)
+
+Streaming firmware, Python reader, capture and analysis scripts (branch `phase1-adxl355-stream`, guide in `docs/PHASE1_BRINGUP.md` step 3). Built and tested by Claude in a Linux cloud container, **not on the Mac and not on a board**. Every capture used in these tests is synthetic (generated noise and hand-made bytes).
+
+| Command | Result |
+| --- | --- |
+| `rm -f sdkconfig; idf.py set-target esp32s3; idf.py build` (in `firmware/`) | Exit 0, no compiler warnings. `af_monitor.bin` 0x32fe0 bytes, 80 % of the app partition free. Generated `sdkconfig` has `CONFIG_FREERTOS_HZ=1000`. |
+| Same build with `CONFIG_FREERTOS_HZ=100` in `sdkconfig` | Stops with "static assertion failed: CONFIG_FREERTOS_HZ must be 1000", as intended. |
+| `c++ -std=c++17 -Wall -Wextra -I firmware/main firmware/test/host/test_stream_frame.cpp -o /tmp/test_stream_frame && /tmp/test_stream_frame` | 18 checks, `PASS (0 failures)`: CRC-16 check value 0x29B1, a known frame byte for byte, FIFO parser cases (split sets, orphan and empty words). |
+| `test_adxl355_decode.cpp` (same command pattern) | `all passed`, unchanged. |
+| `python -m pytest python -q` | 73 passed (58 before plus 15 new). The new tests feed a synthetic stream through the parser in 7-byte pieces, recover a corrupted frame, check the CSV round trip is lossless, and run the capture script end to end against a fake serial port. |
+
+The 921,600 baud stream, the sample rate, and the noise floor have not been run on hardware yet. Those are the step 3 checks.
+
