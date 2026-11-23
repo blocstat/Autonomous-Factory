@@ -33,9 +33,12 @@ Everything else in the kit (PT100, current clamp, RS485, microSD, Ethernet, disp
    source "$HOME/.espressif/tools/activate_idf_v6.1.1.sh"
    ```
 
-3. Build, with no board connected yet:
+3. Build, with no board connected yet. Run this from **this repository** (not from the ESP-IDF folder `~/esp/esp-idf`, which gives "is not buildable"), on the `phase1-adxl355-bringup` branch until it is merged:
 
    ```bash
+   cd ~/"Documents/the Autonomous factory company/autonomous-factory"
+   git fetch
+   git checkout phase1-adxl355-bringup
    cd firmware
    idf.py set-target esp32s3
    idf.py build
