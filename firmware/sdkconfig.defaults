@@ -3,3 +3,7 @@
 CONFIG_IDF_TARGET="esp32s3"
 
 CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# Board: DIYmall ESP32-S3-DevKitC-1 copy with a Sparkle IoT XH-S3E N16R8
+# module (16 MB flash, 8 MB PSRAM). PSRAM is not used yet.
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y

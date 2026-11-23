@@ -1,8 +1,11 @@
 # af_monitor firmware skeleton
 
-ESP-IDF C++ application for an ESP32-S3. It logs a heartbeat and does nothing else.
+ESP-IDF C++ application for an ESP32-S3 (Phase 1 bring-up). It reads the ADXL355 ID registers over SPI, prints PASS or FAIL, then prints one uncalibrated reading per second (x, y, z in g and temperature). Wiring and pass/fail checks: `docs/PHASE1_BRINGUP.md`.
 
-It does not sample sensors, join a network, or drive outputs. Do not flash it onto a board that is wired to mains, machinery, or safety-critical controls.
+It does not stream at full rate, store data, join a network, or drive outputs. Power the board from USB only. Do not flash it onto a board that is wired to mains, machinery, or safety-critical controls.
+
+- `main/adxl355.hpp`, `main/adxl355.cpp`: minimal SPI driver (ID, reset, measurement mode, one burst read of temperature and x/y/z).
+- `main/main.cpp`: pins (SPI2 on GPIO10 CS, 11 MOSI, 12 SCLK, 13 MISO), ID check, 1 Hz readout. Lines meant for scripts start with `AF,`.
 
 ## Build status
 

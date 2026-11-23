@@ -161,3 +161,40 @@ Run by Rami on the MacBook Pro in Cursor's terminal, branch `phase0b-phone-captu
 | `python -m pytest python -q` | `58 passed in 2.91s`. |
 
 This is the first confirmation on the Mac that the Phase 0 and Phase 0b tests pass. The tests use synthetic data and synthetic phone-format fixtures only.
+
+## Verification record — 22 November 2026 (Phase 1 firmware, build only)
+
+Firmware for ADXL355 bring-up (`firmware/main/`, guide in `docs/PHASE1_BRINGUP.md`). Built by Claude in a Linux cloud container, **not on the Mac and not on a board**. ESP-IDF v6.1.1 was cloned from GitHub; its Python environment was installed with `idf_tools.py install-python-env --no-constraints` because the container could not reach dl.espressif.com for the constraints file.
+
+| Command | Result |
+| --- | --- |
+| `idf.py set-target esp32s3` then `idf.py build` (in `firmware/`) | Exit 0, no compiler warnings. `Project build complete`. `af_monitor.bin` is 0x2e670 bytes, 82 % of the 1 MB app partition free. Flash size 16MB. |
+| `c++ -std=c++17 -Wall -Wextra -I firmware/main firmware/test/host/test_adxl355_decode.cpp -o /tmp/test_adxl355_decode && /tmp/test_adxl355_decode` (g++ 13.3) | 9 known-answer checks on hand-made byte patterns, `all passed`. |
+
+Nothing was flashed and no sensor was read. The ID check and the gravity check in `docs/PHASE1_BRINGUP.md` are the first hardware tests and have not been run yet.
+
+## Verification record — 22 November 2026 (Phase 1 step 1 on the Mac and board)
+
+Run by Rami on the MacBook Pro, reported to Claude as terminal output. Branch `phase1-adxl355-bringup` (app version `4971518`), ESP-IDF v6.1.1.
+
+| Command | Result |
+| --- | --- |
+| `idf.py set-target esp32s3`, `idf.py build` | Built. `af_monitor.bin` 0x2e670 bytes, same as the cloud build. |
+| `idf.py -p /dev/cu.usbmodem1234561 flash monitor` | Failed to connect: "Invalid head of packet (0x1B)". |
+| `idf.py -p /dev/cu.usbserial-0001 -b 115200 flash monitor` | Flashed and hash verified. esptool: ESP32-S3 (QFN56) revision v0.2, embedded PSRAM 8MB (AP_3v3), 40 MHz crystal; flash chip "boya", 16MB. App started; with no sensor wired it printed `AF,id,devid_ad=0x00,devid_mst=0x00,partid=0x00,revid=0x00,result=FAIL` every 2 s, as expected for step 1. |
+
+Step 1 (toolchain, build, flash, log) passed. The ADXL355 had not been wired; no sensor data exists yet.
+
+## Verification record — 22 November 2026 (Phase 1 step 2: first ADXL355 readings)
+
+Run by Rami on the second ESP32-S3 board of the pack (the first had our firmware from step 1; this one still had the factory `led_strip` demo and was flashed first). EVAL-ADXL355-PMDZ wired as in `docs/PHASE1_BRINGUP.md`. Output saved in `data/measured/adxl355/raw/20261122-2246_adxl355_bringup-static_board-flat.txt` (`data_origin: adxl355`).
+
+| Check | Result |
+| --- | --- |
+| ID registers | `devid_ad=0xAD, devid_mst=0x1D, partid=0xED, revid=0x01`, `result=PASS`. Matches the data sheet. |
+| Gravity at rest, 16 readings | Mean x 0.1145 g, y −0.0177 g, z 0.9914 g. Total 0.9982 g (0.9959–1.0055). Within the ±8 % tolerance; the x and y values are a tilt of about 6.7°. |
+| Stability | Standard deviation x 0.0005 g, y 0.0010 g, z 0.0022 g at 1 reading/s. One z reading of 0.9989 (14090 ms) stands out; possibly a touch. |
+| Temperature | 26.0–26.4 °C, uncalibrated. |
+
+The SPI wiring, settings and data decoding work on real hardware. Sample rate, noise density and vibration response are not tested yet (step 3).
+
