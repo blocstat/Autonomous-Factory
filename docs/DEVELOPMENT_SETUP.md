@@ -172,3 +172,16 @@ Firmware for ADXL355 bring-up (`firmware/main/`, guide in `docs/PHASE1_BRINGUP.m
 | `c++ -std=c++17 -Wall -Wextra -I firmware/main firmware/test/host/test_adxl355_decode.cpp -o /tmp/test_adxl355_decode && /tmp/test_adxl355_decode` (g++ 13.3) | 9 known-answer checks on hand-made byte patterns, `all passed`. |
 
 Nothing was flashed and no sensor was read. The ID check and the gravity check in `docs/PHASE1_BRINGUP.md` are the first hardware tests and have not been run yet.
+
+## Verification record — 22 November 2026 (Phase 1 step 1 on the Mac and board)
+
+Run by Rami on the MacBook Pro, reported to Claude as terminal output. Branch `phase1-adxl355-bringup` (app version `4971518`), ESP-IDF v6.1.1.
+
+| Command | Result |
+| --- | --- |
+| `idf.py set-target esp32s3`, `idf.py build` | Built. `af_monitor.bin` 0x2e670 bytes, same as the cloud build. |
+| `idf.py -p /dev/cu.usbmodem1234561 flash monitor` | Failed to connect: "Invalid head of packet (0x1B)". |
+| `idf.py -p /dev/cu.usbserial-0001 -b 115200 flash monitor` | Flashed and hash verified. esptool: ESP32-S3 (QFN56) revision v0.2, embedded PSRAM 8MB (AP_3v3), 40 MHz crystal; flash chip "boya", 16MB. App started; with no sensor wired it printed `AF,id,devid_ad=0x00,devid_mst=0x00,partid=0x00,revid=0x00,result=FAIL` every 2 s, as expected for step 1. |
+
+Step 1 (toolchain, build, flash, log) passed. The ADXL355 had not been wired; no sensor data exists yet.
+

@@ -64,6 +64,8 @@ Everything else in the kit (PT100, current clamp, RS485, microSD, Ethernet, disp
 
    If flashing fails to connect: hold **BOOT**, press and release **RST**, release **BOOT**, then run the command again.
 
+   On Rami's board (22 November 2026), flashing failed on `/dev/cu.usbmodem1234561` ("Invalid head of packet (0x1B)") and worked on `/dev/cu.usbserial-0001` with `-b 115200`. Use that port first.
+
 ## Step 2 — Wire the ADXL355 and check its ID
 
 Unplug the USB cable first.
