@@ -229,6 +229,10 @@ def test_grouping_and_header_helpers():
     assert state_for_condition("baseline") == "off"
     assert state_for_condition("baseline-after") == "off"
     assert state_for_condition("screw-left") == "on"
+    assert state_for_condition("sham-restart") == "off"
+    for name in ("steady-check", "fans-off", ""):
+        with pytest.raises(ValueError, match="not part of a weight round"):
+            state_for_condition(name)
     states = ["off", "off", "on", "on", "off"]
     caps = [CaptureInput(str(i), np.zeros((10, 3)), RATE, s, DATA_ORIGIN_SYNTHETIC)
             for i, s in enumerate(states)]

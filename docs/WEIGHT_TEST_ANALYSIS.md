@@ -10,7 +10,7 @@ Scope: one bench test on the Havit USB cooling pad. It is **not** fault detectio
 
 ## How to run it (next session)
 
-Captures in time order. With the usual `--condition` names (`baseline`, `baseline-after` = no weight; anything else, e.g. `screw-left` = weight on), the files group themselves:
+Captures in time order. With the usual `--condition` names (`baseline`, `baseline-after`, `sham-restart` = no weight; `steady-check` and `fans-off` are refused; anything else, e.g. `screw-left` = weight on), the files group themselves:
 
 ```bash
 cd autonomous-factory

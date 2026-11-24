@@ -90,7 +90,9 @@ QUALITY_KEYS = (
     "frames_flagged_overrun",
     "frames_flagged_dropped",
 )
-OFF_CONDITIONS = ("baseline", "baseline-after", "off", "screw-off", "weight-off")
+OFF_CONDITIONS = ("baseline", "baseline-after", "off", "screw-off", "weight-off", "sham-restart")
+# Captures that belong to no weight round; give them with --off/--on if really wanted.
+NOT_A_ROUND = ("steady-check", "fans-off", "rest", "warmup", "unplug-test")
 
 PASS = "PASS"
 NOT_DETECTED = "NOT DETECTED"
@@ -186,7 +188,13 @@ def quality_problems(header: dict[str, str]) -> tuple[str, ...]:
 
 
 def state_for_condition(condition: str) -> str:
-    return "off" if condition.strip().lower() in OFF_CONDITIONS else "on"
+    name = condition.strip().lower()
+    if name in NOT_A_ROUND or not name:
+        raise ValueError(
+            f"condition '{condition}' is not part of a weight round; leave the file out or "
+            "name the groups with --off/--on"
+        )
+    return "off" if name in OFF_CONDITIONS else "on"
 
 
 def capture_from_file(path: Path, state: str | None = None) -> CaptureInput:
