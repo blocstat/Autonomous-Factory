@@ -1,8 +1,8 @@
 # Phase 1 — ADXL355 bring-up on the ESP32-S3
 
-**Goal:** get the product sensor (ADXL355) talking to the ESP32-S3 over SPI, and prove it with known answers before any vibration data is trusted. This guide covers steps 1 and 2. Step 3 (full-rate raw streaming over USB into the Python analysis) comes after step 2 passes.
+**Goal:** get the product sensor (ADXL355) talking to the ESP32-S3 over SPI, and prove it with known answers before any vibration data is trusted. Steps 1 and 2 (toolchain, wiring, ID and gravity) passed on 22 November 2026. Step 3 streams every sample at 4,000 per second over USB into Python and measures the noise floor at rest.
 
-**Time:** step 1 about 1 hour (mostly download), step 2 about 1 hour. **Cost:** $0, the parts are already here.
+**Time:** step 1 about 1 hour (mostly download), step 2 about 1 hour, step 3 about 45 minutes. **Cost:** $0, the parts are already here.
 
 Every reading from this hardware is labelled as ADXL355 data. Until the unit is calibrated, values in g are good to about ±8 % (the data sheet's sensitivity tolerance). Nothing here says anything about an industrial machine.
 
@@ -97,6 +97,8 @@ idf.py -p /dev/cu.usbmodem1101 monitor
 
 (No need to flash again: the step 1 firmware already contains the sensor code. Press **RST** on the board to restart it.)
 
+This applies to the step 1–2 firmware only. The step 3 firmware sends binary data, which `idf.py monitor` shows as garbage; read it with the capture script in step 3.
+
 ### Pass/fail checks
 
 | Check | Pass | If it fails |
@@ -110,13 +112,98 @@ idf.py -p /dev/cu.usbmodem1101 monitor
 
 Record the result in the thread: the `AF,id` line and about 10 `AF,sample` lines with the board flat. Those become the first ADXL355 verification record in `docs/DEVELOPMENT_SETUP.md`.
 
+## Step 3 — Stream every sample and measure the noise floor
+
+**What it does.** The firmware reads the ADXL355's FIFO every millisecond and sends every x/y/z sample (4,000 per second, 1,000 Hz low-pass, ±2 g) to the Mac in small binary packets with a checksum, on the same USB cable and port you flash with (`/dev/cu.usbserial-0001`), at 921,600 baud. Once per second it adds a text status line with counters (FIFO overruns, dropped words, SPI errors) and the temperature. A Python script records the stream into a CSV file of raw counts and checks it.
+
+**What it proves.** That no sample is lost between the sensor and the Mac, that the sample rate is what the sensor's clock allows, and that the noise floor at rest is close to the data sheet's 22.5 µg/√Hz. It says nothing about a fan or a machine yet; that comes after this passes.
+
+Wiring is unchanged from step 2. Use the board that passed step 2.
+
+### 3.1 Get the code and the one new Python package
+
+```bash
+cd ~/"Documents/the Autonomous factory company/autonomous-factory"
+git fetch
+git checkout phase1-adxl355-stream
+source .venv/bin/activate
+python -m pip install -r python/requirements.txt
+python -m pytest python -q
+```
+
+The new package is `pyserial` (reads the USB port). **Pass:** pytest ends with `73 passed`.
+
+### 3.2 Build and flash
+
+The streaming firmware needs a 1 ms scheduler tick, a setting that only takes effect in a fresh `sdkconfig`. So delete the old one first (if you forget, the build stops with "CONFIG_FREERTOS_HZ must be 1000").
+
+```bash
+source "$HOME/.espressif/tools/activate_idf_v6.1.1.sh"
+cd firmware
+rm -f sdkconfig
+idf.py set-target esp32s3
+idf.py build
+idf.py -p /dev/cu.usbserial-0001 -b 115200 flash
+cd ..
+```
+
+Use `flash` only, not `flash monitor`. **Pass:** `Hash of data verified` and `Hard resetting via RTS pin...`.
+
+### 3.3 Record three captures at rest
+
+Set up:
+
+1. Sensor board flat on the desk, as in step 2. Nothing touching it, including the jumper wires (tape the wires to the desk a few cm from the board if they pull on it).
+2. Fans off. Washing machine off if you can. Don't type on or bump the desk during a capture.
+3. No `idf.py monitor` running: only one program can open the port.
+
+Run, from the repository root (the virtual environment still active):
+
+```bash
+python python/scripts/capture_adxl355.py --port /dev/cu.usbserial-0001 --condition rest --mount desk-flat --repeat 1
+```
+
+The script resets the board, prints the `AF,id` line, records 30 seconds (progress every 5 s), saves the file and prints the checks. Then run it twice more with `--repeat 2` and `--repeat 3`, without moving anything.
+
+Files:
+
+- `data/measured/adxl355/raw/YYYYMMDD-HHMM_adxl355_rest_desk-flat_r1.csv`: raw counts for every sample plus every status line, labelled `data_origin: adxl355`. About 3 MB each.
+- `data/measured/adxl355/out/…_noise.png`: noise density plot (not committed; recreate any time).
+
+To re-check saved files later: `python python/scripts/analyze_adxl355.py data/measured/adxl355/raw/*_adxl355_rest_*.csv`.
+
+### Pass/fail checks (printed by the script)
+
+| Check | Pass | If it fails |
+| --- | --- | --- |
+| **Missing sets** | 0 | Samples were lost on the way. Try another USB port on the Mac (no hub) and repeat. |
+| **CRC errors** | 0 | Bytes were corrupted on the cable. Same as above; a different USB-C cable is the next thing to try. |
+| **FIFO overruns, dropped FIFO words** | 0 | The board fell behind the sensor. Check that you deleted `sdkconfig` before building (3.2). |
+| **SPI errors** | 0 | A loose wire. Unplug USB, check the step 2 wiring, repeat. |
+| **Output data rate** | 3,944–4,056 Hz (4,000 Hz ±1.4 %, the data sheet's clock tolerance) | Write down the value. Outside this range means the rate is not what we think it is; stop and report it. |
+| **Gravity at rest** | Total 0.92–1.08 g, as in step 2 | Same as step 2. |
+| **x, y, z noise density** | Median from 10 to 800 Hz between 5 and 45 µg/√Hz (the data sheet's typical is 22.5; the first board measured 12–17) | Above 45 shows as **CHECK**: almost always vibration from the room or desk, not the sensor. Look at the plot for peaks, move the board to a heavier surface (floor tile, kitchen counter) and repeat. Below 5 is a **FAIL**: the data is probably stuck or wrong. |
+| **Temperature** | 15–40 °C | Uncalibrated; write it down. |
+
+**Step 3 passes** when all three captures say `OVERALL: PASS` (or `CHECK` only on noise, with a peak you can explain). The three captures should agree with each other on noise within about 20 %.
+
+### Troubleshooting
+
+- *"Cannot open /dev/cu.usbserial-0001 … Resource busy":* close `idf.py monitor` (Ctrl+]) or any other terminal using the port.
+- *"No sample frames within 10 s":* if the `AF,id` line says FAIL, it's wiring (step 2 table). If nothing printed at all, the firmware may not be flashed, or the board didn't reset: run the script with `--no-reset` and press **RST** right after starting it.
+- *The stream stops mid-capture:* the board restarted or the cable moved. The script saves what arrived and says so; repeat the capture.
+
+### What to send back
+
+Say "done" in the thread. Claude reads the three CSV files from the repository folder on the Mac, checks the numbers and adds them to `docs/DEVELOPMENT_SETUP.md` as the first full-rate ADXL355 record.
+
 ## What step 2 proves and does not prove
 
-It proves the wiring, the SPI settings and the data decoding (ID registers are fixed values; gravity is a known 1 g input). It does not test sample rate, noise or vibration: that is step 3, which streams every sample at 4,000 per second over USB and measures the noise floor with nothing running, the same way the phone sessions did.
+It proves the wiring, the SPI settings and the data decoding (ID registers are fixed values; gravity is a known 1 g input). It does not test sample rate, noise or vibration: that is step 3 above.
 
 ## Sources
 
-- ADXL354/ADXL355 data sheet, Rev. D (Analog Devices): register map, SPI mode 0 and 0.1–10 MHz clock, 20-bit two's-complement data, 256,000 LSB/g typical at ±2 g, supply 2.25–3.6 V.
+- ADXL354/ADXL355 data sheet, Rev. D (Analog Devices): register map, SPI mode 0 and 0.1–10 MHz clock, 20-bit two's-complement data, 256,000 LSB/g typical at ±2 g, supply 2.25–3.6 V. FIFO: 96 words, x-axis marker in bit 0 and empty marker in bit 1 of each word, FIFO_DATA does not auto-increment. Noise density 22.5 µg/√Hz typical at ±2 g. Internal clock ±1.4 % device to device.
 - EVAL-ADXL355-PMDZ user guide (Analog Devices wiki): P1 pin table; Pmod 3.3 V supplied by the host.
 - Analog Devices no-OS ADXL355 driver: first SPI byte is `(address << 1) | 1` for a read, `(address << 1)` for a write.
 - ESP-IDF v6.1 SPI Master documentation (ESP32-S3): SPI2 IO_MUX pins CS0 10, MOSI 11, SCLK 12, MISO 13.

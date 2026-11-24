@@ -2,6 +2,8 @@
 
 #include <cstring>
 
+#include "esp_heap_caps.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -18,6 +20,13 @@ esp_err_t Device::attach(spi_host_device_t host, int cs_gpio, int clock_hz) {
     config.clock_speed_hz = clock_hz;
     config.spics_io_num = cs_gpio;
     config.queue_size = 1;
+    // DMA-capable buffers for FIFO reads (up to 1 + 96 * 3 bytes).
+    const size_t fifo_bytes = 1 + 3 * FIFO_WORDS;
+    dma_tx_ = static_cast<uint8_t *>(heap_caps_calloc(1, fifo_bytes, MALLOC_CAP_DMA));
+    dma_rx_ = static_cast<uint8_t *>(heap_caps_calloc(1, fifo_bytes, MALLOC_CAP_DMA));
+    if (dma_tx_ == nullptr || dma_rx_ == nullptr) {
+        return ESP_ERR_NO_MEM;
+    }
     return spi_bus_add_device(host, &config, &handle_);
 }
 
@@ -80,6 +89,39 @@ esp_err_t Device::read_sample(RawSample &sample) {
     sample.y = decode_axis(b[5], b[6], b[7]);
     sample.z = decode_axis(b[8], b[9], b[10]);
     return ESP_OK;
+}
+
+esp_err_t Device::read_status_and_entries(uint8_t &status, uint8_t &entries) {
+    uint8_t b[2] = {};
+    const esp_err_t err = read(reg::STATUS, b, sizeof(b));
+    status = b[0];
+    entries = static_cast<uint8_t>(b[1] & 0x7F);
+    return err;
+}
+
+esp_err_t Device::read_fifo(uint8_t *out, size_t n_words) {
+    if (n_words == 0 || n_words > FIFO_WORDS) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    const size_t length = 1 + 3 * n_words;
+    std::memset(dma_tx_, 0, length);
+    dma_tx_[0] = static_cast<uint8_t>((reg::FIFO_DATA << 1) | 0x01);
+    spi_transaction_t transaction = {};
+    transaction.length = length * 8;
+    transaction.tx_buffer = dma_tx_;
+    transaction.rx_buffer = dma_rx_;
+    const esp_err_t err = spi_device_polling_transmit(handle_, &transaction);
+    if (err == ESP_OK) {
+        std::memcpy(out, dma_rx_ + 1, 3 * n_words);
+    }
+    return err;
+}
+
+esp_err_t Device::read_temperature(uint16_t &raw) {
+    uint8_t b[2] = {};
+    const esp_err_t err = read(reg::TEMP2, b, sizeof(b));
+    raw = static_cast<uint16_t>(((b[0] & 0x0F) << 8) | b[1]);
+    return err;
 }
 
 }  // namespace adxl355
