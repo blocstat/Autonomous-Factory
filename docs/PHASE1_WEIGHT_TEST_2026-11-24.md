@@ -115,7 +115,7 @@ Options if imbalance is to be tested further (none done): sensor on the pad's fr
 
 - **No 1× growth beyond the normal spread:** the highest lines with the weight (up to 162 µg/√Hz, r1 only) are matched by the weight-off captures (up to 161). r2 and r3 with the weight are no higher than the baseline.
 - **No rub:** no repeating knocks (the first test's rub gave envelope lines thousands of times the floor). The high-frequency level rose 1.3× with the weight, within the 1.5× limit, but rose further (1.5×) after the weight was removed, so it is not caused by the weight.
-- **The fans slowed through the session:** blade-pass lines fell about 5 % from 08:20 to 08:37 and about 5–10 % more by 08:50, with the weight already off. Something changed in the pad or its supply during this period (cause unknown); that drift is far larger than any 1× change.
+- **The fans slowed through the session:** blade-pass lines fell about 5 % from 08:20 to 08:37 and about 5–10 % more by 08:50, with the weight already off. Something changed in the pad or its supply during this period; Rami suspects a fan connector inside the pad was not fully plugged in (possible, not confirmed). That drift is far larger than any 1× change.
 - Two single bumps (one per capture, in r3 of the weight and weight-off sets) look like touches to the desk or board; they do not change the result.
 
 ## Where this leaves imbalance testing
