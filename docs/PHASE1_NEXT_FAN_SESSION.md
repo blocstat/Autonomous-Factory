@@ -17,9 +17,9 @@ Do Part B only after Part A, whatever Part A's result: Part A's numbers are the 
 
 ## Rules decided before the data
 
-These are fixed now, before any capture. The analysis script being written in a separate task applies rules like these; if its definitions differ in detail, the wording below is what counts for this session.
+These are fixed before any capture, once Rami has approved them. The analysis script (PR #9) applies the same rules; where it needs a precise definition (how a fan's line is tracked, how the floor is computed), the script's definition counts, so the rule is applied the same way every time.
 
-**Measure.** For each capture: the y-axis peak in **25.5–27 Hz** (µg/√Hz, Welch spectrum, as in PR #7), its frequency, the 800–1500 Hz z level (median of 1 s pieces), the 800–1500 Hz kurtosis, and the fans' blade-pass lines.
+**Measure.** For each capture: the left fan's 1× line on the y axis, **tracked from that fan's speed** as PR #9 does (µg/√Hz), its frequency, the 800–1500 Hz z level (median of 1 s pieces), the 800–1500 Hz kurtosis, and the fans' blade-pass lines. The fixed 25.5–27 Hz band used in PR #7 was chosen after seeing that data, so it is reported alongside for comparison but does not decide the outcome.
 
 **Clean data.** Every capture must have 0 missing sets and 0 CRC errors. A capture that fails is re-taken (next `--repeat` number); both files are kept.
 
@@ -33,11 +33,13 @@ These are fixed now, before any capture. The analysis script being written in a 
 
 | Outcome | Condition |
 | --- | --- |
-| **Confirmed** | Every screw-on capture (both rounds, 6 or more) has a y peak at least **3× the baseline level**, and every no-screw capture after the baseline (screw-off and sham, 9 or more) is no higher than the **baseline max**. |
+| **Confirmed** | Every screw-on capture (both rounds, 6 or more) has a y peak at least **3× the baseline level**, and every no-screw capture after the baseline (screw-off and sham, 9 or more) is **below 3× the baseline level**. |
 | **Inconclusive** | Any sham capture reaches 3× the baseline level (a restart alone makes the line), or the rub guard trips and cannot be fixed, or fewer than 2 clean, unbumped captures remain in any block. |
 | **Not confirmed** | Anything else, for example one screw-on capture below 3×, or a screw-off capture above the baseline max. |
 
-The y axis and the 25.5–27 Hz band are kept from PR #7 so the result is comparable. If a fan's speed moves the left fan's line outside 25.5–27 Hz, that is reported, and the outcome is judged as written anyway.
+Why "below 3×" and not "no higher than the highest baseline": with 3 baseline captures, each later capture has about a 1-in-4 chance of beating the highest one on noise alone, so with 9 later captures that version would fail most of the time even with nothing changed (synthetic check in PR #9).
+
+The "every screw-on capture" part is strict on purpose. On 24 November one of the three left-fan screw captures (r2) would not have passed it, so a Not confirmed outcome is a real possibility and will be reported as such.
 
 ## Safety (both parts)
 
