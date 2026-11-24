@@ -51,6 +51,43 @@ x and y show the same: 800–1500 Hz rises 5–6× (x) and 12–18× (y) with th
 - **Imbalance (1× at normal speed) is still untested**: the weights were large enough, or placed so, that something knocked. A pure imbalance test needs a smaller weight that does not touch anything and does not change the fan's sound or speed.
 - Features that worked here: high-frequency RMS, kurtosis, and the envelope's repetition rate. Features that need care: fixed frequency bands near the fan lines (they move with fan speed).
 
-## Suggested next test (not done)
+## Suggested next test (done at 08:13, see below)
 
 Same A-B-A plan with **one** fan weighted, cover on as in normal use, and a much smaller weight (a single small piece of tape, folded once), checked by eye and ear to spin freely at normal speed. Before the data: the new run passes if the weighted fan's 1× line at its normal speed grows more than its baseline vs baseline-after spread, with the high-frequency level unchanged (no rub).
+
+## Weights used in the first test
+
+Rami's photo at 07:58 shows the two objects that were in the bags: a clear dome about 1 cm across and a strip of black foam with a short bent wire (red insulation). Which object was on which fan is not recorded.
+
+# Small-weight test, same morning (08:13–08:21)
+
+**Data origin:** `adxl355`, same sensor, mount (`board-beside`) and pad as above, bottom cover off throughout. USB cooling pad, **not an industrial machine**.
+
+**Raw data:** `20261124-0813..0814_adxl355_small-weight_board-beside_r{1,2,3}.csv` and `20261124-0820..0821_adxl355_baseline-after_board-beside_r{1,2,3}.csv`. The 07:42–07:44 baseline-after captures of the first test serve as this test's baseline (Rami had already put the tape on, so the baseline was not repeated).
+
+**Weight:** a piece of tape, about 2 × 1 cm folded once, flat on the top face of one blade of the **middle fan**, about halfway out. Pad unplugged to add and remove it, then 3 minutes running before capturing.
+
+**Criterion (written before the data):** detected only if the middle fan's 1× line grows more from baseline to tape than it differs between the two baselines, with the 800–1500 Hz level within 1.5× of baseline (no rub).
+
+![small weight test](img/adxl355_small_weight_test_2026-11-24.png)
+
+| | 07:42 baseline r1–r3 | 08:13 tape r1–r3 | 08:20 tape off r1–r3 |
+| --- | --- | --- | --- |
+| Data path | 0 missing, 0 CRC, 0 overruns | same | same |
+| z RMS 800–1500 Hz | 0.35–0.36 mg | 0.36–0.37 mg | 0.38–0.40 mg |
+| Kurtosis, 800–1500 Hz | 3.0 | 3.0 | 3.0, 3.0, 4.4 |
+| Strongest lines 22–31 Hz (x+y+z, µg/√Hz) | 55–116 | 63–248 | 55–128 |
+| Blade-pass lines (9×) | 231–233, 254 Hz | 233–274 Hz | 224, 240–242, 262–264 Hz |
+
+## Result: not detected
+
+- **No rub:** the 800–1500 Hz level with the tape is the same as both baselines.
+- **No 1× growth beyond the normal spread.** Lines in 22–31 Hz are 2–5× the floor in every capture, with and without tape. The highest single value (248 µg/√Hz at 30.0 Hz, tape r1) sits at a frequency that also peaks without the tape (128 at 30.0 Hz, 08:21 r2) and does not match any fan's blade-pass ÷ 9. Which line is the middle fan's could not be told apart.
+- **Session drift is larger than the tape:** fan blade-pass lines moved from 231–233/254 Hz at 07:42 to 240–242/262–264 Hz at 08:20 (about +4 %), with no weight on.
+- One tape-off capture (08:21 r3) has kurtosis 4.4, a few knocks or a bump; it does not change the result.
+
+## What this means
+
+The tape-sized imbalance on one fan of this pad is **not visible** with the sensor beside the pad: the fans' 1× lines are close to the floor and they wander more between captures than the tape could change them. This is consistent with Phase 0b (no 1× seen with the phone). A rub, as in the first test, is visible; a small imbalance on this fan, at this distance, is not.
+
+Options if imbalance is to be tested further (none done): sensor on the pad's frame instead of beside it, a heavier weight that still spins freely, or a rig with a stiffer, slower rotor than a USB fan.
