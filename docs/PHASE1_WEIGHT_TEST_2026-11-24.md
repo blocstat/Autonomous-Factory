@@ -162,3 +162,31 @@ Two weights on the middle fan (folded tape, then a small screw), neither detecte
 ## Overall, imbalance on this pad (three attempts)
 
 Folded tape, a small screw, and the screw again with steady fans: **none detected**. The fans' 1× lines sit near the noise floor with the sensor beside the pad, and the fans' speeds shift by 1–3 % whenever the pad is unplugged and restarted, which is about as large as any effect a small weight could have. A rub (first test) is detected easily. Further imbalance testing on this pad would need a different mount (sensor on the pad's frame) rather than more weight.
+
+# Screw on the LEFT fan, nearest the sensor (11:43–11:53)
+
+**Data origin:** `adxl355`, same setup, cover off. USB cooling pad, **not an industrial machine**. **Raw data:** `20261124-1143..1144_adxl355_screw-left_board-beside_r{1,2,3}.csv` and `20261124-1152..1153_adxl355_baseline-after_board-beside_r{1,2,3}.csv`; baseline = the 11:09–11:10 screw-off captures (Rami's choice). **Weight:** the same small screw, fully taped, on the left fan (the one nearest the sensor), same position on the blade; 5 minutes running after each plug-in.
+
+**Criterion:** same as the 10:32 test, written before the data (1× growth larger than the baseline-to-baseline difference, 800–1500 Hz within 1.5×; inconclusive if fan lines in the two baselines differ by more than 1 %).
+
+![left fan screw test](img/adxl355_screw_left_test_2026-11-24.png)
+
+| | 11:09 baseline r1–r3 | 11:43 screw on left fan r1–r3 | 11:52 screw off r1–r3 |
+| --- | --- | --- | --- |
+| Data path | 0 missing, 0 CRC, 0 overruns | same | same |
+| z 800–1500 Hz, median of 1 s pieces | 0.33–0.34 mg | 0.33–0.36 mg | 0.36–0.41 mg |
+| y peak 25.5–27 Hz (µg/√Hz, floor in brackets) | 39 (23), 25 (15), 47 (17) | **124 (15), 64 (29), 132 (15)** | 19 (13), 24 (13), 27 (13) |
+| Frequency of that y peak | 26.6–26.7 Hz | 26.3–26.5 Hz | 26.2–26.6 Hz |
+| z peak 25.5–27 Hz | 174, 55, 124 | 186, 220, 211 | 52, 42, 52 |
+| Blade-pass lines, Hz | 209–210, 230, 231–233, 261–262 | 205–214, 226–227, 234–239, 260–270 | 205–214, 227–230, 232–234, 256–262 |
+
+## Result: a 1× line appears with the screw, but the test is inconclusive by the pre-set rule
+
+- **What changed:** with the screw on, a line at **26.3–26.5 Hz** stands 8–9× above the floor on the y axis in r1 and r3 (124 and 132 µg/√Hz) and 2× in r2 (64, a capture with a raised floor). In the six captures without the screw, the same band is 1–3× the floor (19–47). On z it is 186–220 with the screw against 42–174 without (the 174 is in a capture with bumps). It goes away when the screw is removed. 26.4 × 9 = 238 Hz matches a blade-pass line seen in the screw captures (234–239 Hz), so it is one fan's once-per-turn line: **the expected signature of imbalance**.
+- **No rub:** 800–1500 Hz unchanged.
+- **Why inconclusive:** one fan's blade-pass line differs by 1.9 % between the two baselines (about 209 → 205 Hz), above the 1 % limit set before the data. Also, the fan carrying the new line ran slightly faster with the screw (blade-pass 234–239 Hz against 231–234 Hz without), so part of the rise could come from the line landing on a board resonance rather than from the screw.
+- **Why the left fan works and the middle did not (likely, not proven):** it is closer to the sensor.
+
+## To confirm (not done)
+
+Repeat screw on / screw off two more times on the left fan (A-B-A-B-A), same 5-minute waits. Before the data: confirmed if the y line at the left fan's 1× is at least 3× the baseline level in every screw-on capture and back within the baseline range in every screw-off capture.
