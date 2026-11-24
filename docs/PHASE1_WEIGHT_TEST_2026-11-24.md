@@ -136,3 +136,29 @@ Two weights on the middle fan (folded tape, then a small screw), neither detecte
 | 10:25 | 0.41 mg | 209.9, 223.0, 236.7, 262.3 |
 
 **Result: steady enough.** From 10:12 to 10:25 every line moved 0.6 % or less; from the very first capture (10:10) to 10:25, 0.8–1.0 %, most of it in the first two minutes. All captures clean (0 missing sets, 0 CRC errors). The high-frequency level is back near the 08:20 value (0.36–0.41 vs 0.57 mg at 08:50), which fits the loose-connector explanation but does not prove it. Rule for the next imbalance test: start the baseline only after the lines have held within 1 % for at least 10 minutes.
+
+# Screw test with steady fans (10:32–11:10)
+
+**Data origin:** `adxl355`, same setup, cover off, fan connectors reseated and speed checked steady beforehand. USB cooling pad, **not an industrial machine**. **Raw data:** `20261124-1032..1033_adxl355_baseline_*`, `20261124-1047..1048_adxl355_screw-weight_*`, `20261124-1109..1110_adxl355_baseline-after_*` (r1–r3 each). **Weight:** the same small screw, fully covered with tape, on the same spot of the middle fan; 5 minutes running after each plug-in.
+
+**Criterion (written before the data):** detected only if a fan's 1× line grows more from baseline to screw than the two baselines differ, with 800–1500 Hz within 1.5× of baseline; **inconclusive** if the fan lines in the two baselines differ by more than 1 %.
+
+![screw test](img/adxl355_screw_test_2026-11-24.png)
+
+| | 10:32 baseline r1–r3 | 10:47 screw r1–r3 | 11:09 screw off r1–r3 |
+| --- | --- | --- | --- |
+| Data path | 0 missing, 0 CRC, 0 overruns | same | same |
+| z 800–1500 Hz, median of 1 s pieces | 0.40 mg | 0.37–0.38 mg | 0.33–0.34 mg |
+| Kurtosis (bumps) | 2.9–3.0 | 11.7 (r1), 3.0, 3.0 | 4.4 (r1), 3.5, 3.0 |
+| Blade-pass lines, Hz | 210–212, 222–223, 237–238, 263–264 | 213, 226–227, 239–240, 266–267 | 209–210, 230, 232–233, 261–262 |
+| Strongest line 22–31 Hz (x+y+z, µg/√Hz) | 84–122 | 89–313 | 90–252 |
+
+## Result: inconclusive by the pre-set rule, and not detected in any case
+
+- **Baselines differ by more than 1 %:** two of the four blade-pass lines moved 2–3 % between the 10:32 and 11:09 baselines (222–223 → 230 Hz and 237–238 → 232–233 Hz), so by the rule set beforehand the test is inconclusive. Removing the screw and tape, or plugging in again, changed the fans' speeds.
+- **No consistent 1× growth:** the highest line with the screw (313 µg/√Hz at 27.4 Hz) is in r1 only, which also has a bump (kurtosis 11.7) that raises the whole spectrum; r3 with the screw is no higher than the baseline. The screw-off r1 reaches 252 at the same frequency.
+- **No rub:** 800–1500 Hz did not rise.
+
+## Overall, imbalance on this pad (three attempts)
+
+Folded tape, a small screw, and the screw again with steady fans: **none detected**. The fans' 1× lines sit near the noise floor with the sensor beside the pad, and the fans' speeds shift by 1–3 % whenever the pad is unplugged and restarted, which is about as large as any effect a small weight could have. A rub (first test) is detected easily. Further imbalance testing on this pad would need a different mount (sensor on the pad's frame) rather than more weight.
