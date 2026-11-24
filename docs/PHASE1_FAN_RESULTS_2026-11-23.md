@@ -21,7 +21,7 @@
 
 - **Fan:** Havit HV-F2056 cooling pad, three fans, one speed, USB power from a power bar.
 - **Board:** the pad stands on the bamboo board on rubber corner caps on the desk.
-- **Sensor:** EVAL-ADXL355-PMDZ flat on the bamboo board **in front of** the pad (photo at 14:02), held down with clear tape over the top; wires anchored with black tape at the board edge. ESP32-S3 on a separate breadboard about 20 cm away on the desk, not touching the board. The file names say `board-beside`; the photo shows the front position. To be confirmed by Rami.
+- **Sensor:** EVAL-ADXL355-PMDZ flat on the bamboo board, about 1 cm from the pad's short edge, held down with clear tape over the top; wires anchored with tape on the board (photos at 14:02 and 21:10, the second taken right after the captures). ESP32-S3 on a separate breadboard about 20 cm away on the desk, not touching the board. Mount tag in the file names: `board-beside`.
 - **Washing machine:** asked to be off.
 
 | File | What was done |
