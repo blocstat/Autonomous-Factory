@@ -96,7 +96,7 @@ Options if imbalance is to be tested further (none done): sensor on the pad's fr
 
 **Data origin:** `adxl355`, same sensor, mount, pad and cover-off state. USB cooling pad, **not an industrial machine**.
 
-**Raw data:** `20261124-0837..0838_adxl355_medium-weight_board-beside_r{1,2,3}.csv` and `20261124-0849..0850_adxl355_baseline-after_board-beside_r{1,2,3}.csv`. Baseline: the 08:20–08:21 tape-off captures (Rami's choice). The weight's capture note still holds the placeholder text; **what was used is to be recorded**. Same fan (middle) and position as the tape.
+**Raw data:** `20261124-0837..0838_adxl355_medium-weight_board-beside_r{1,2,3}.csv` and `20261124-0849..0850_adxl355_baseline-after_board-beside_r{1,2,3}.csv`. Baseline: the 08:20–08:21 tape-off captures (Rami's choice). Weight: **a small screw** (Rami, 08:57; the capture note still holds the placeholder text). Same fan (middle) and position as the tape.
 
 **Criterion:** same as the small-weight test, written before the data.
 
@@ -120,4 +120,4 @@ Options if imbalance is to be tested further (none done): sensor on the pad's fr
 
 ## Where this leaves imbalance testing
 
-Two weights on the middle fan, neither detected with the sensor beside the pad; a rub (first test) is detected easily. The fans' own speed changes between captures (4–10 % within an hour) are the main obstacle. A further imbalance test should first fix that (speed steady for 10 minutes before the baseline, checked from the blade-pass lines) and move the sensor onto the pad's frame.
+Two weights on the middle fan (folded tape, then a small screw), neither detected with the sensor beside the pad; a rub (first test) is detected easily. The fans' own speed changes between captures (4–10 % within an hour) are the main obstacle. A further imbalance test should first fix that (speed steady for 10 minutes before the baseline, checked from the blade-pass lines) and move the sensor onto the pad's frame.
