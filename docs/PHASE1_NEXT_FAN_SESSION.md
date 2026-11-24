@@ -29,7 +29,7 @@ These are fixed before any capture, once Rami has approved them. The analysis sc
 
 **Restart control (sham), new in this plan.** Unplugging and re-plugging the pad shifts fan speeds by 1–3 %, so the earlier "baselines within 1 %" rule fails on almost any test with several restarts. Instead, this plan adds one *sham* block: the pad is unplugged, the screw is picked up and put down beside the pad, the blade is touched as if placing it, and the pad is plugged back in **without** the screw. That measures directly what a restart alone does to the 25.5–27 Hz line. The blade-pass lines are still recorded and reported for every block.
 
-**Decision (Part A and Part B alike).** Let *baseline level* be the mean y peak of the 3 baseline captures, and *baseline max* the highest of them.
+**Decision (Part A and Part B alike).** Let *baseline level* be the **median** of the left-fan line over the 3 baseline captures (the median, so one bumped baseline capture cannot move the threshold).
 
 | Outcome | Condition |
 | --- | --- |
