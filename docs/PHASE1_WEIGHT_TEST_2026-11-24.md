@@ -121,3 +121,18 @@ Options if imbalance is to be tested further (none done): sensor on the pad's fr
 ## Where this leaves imbalance testing
 
 Two weights on the middle fan (folded tape, then a small screw), neither detected with the sensor beside the pad; a rub (first test) is detected easily. The fans' own speed changes between captures (4–10 % within an hour) are the main obstacle. A further imbalance test should first fix that (speed steady for 10 minutes before the baseline, checked from the blade-pass lines) and move the sensor onto the pad's frame.
+
+# Speed steadiness check after reseating the fan connectors (10:10–10:25)
+
+**Data origin:** `adxl355`, same setup, no weight, cover off. Rami pressed the fan connectors in firmly before these captures. **Raw data:** `20261124-1010..1025_adxl355_steady-check_board-beside_r{1,2,3}.csv` (4 files: the 10:10 file was run with `--repeat 2` by mistake, so `r2` appears twice with different times).
+
+**Criterion (written before the data):** blade-pass lines within 1 % over 10 minutes.
+
+| Capture | 800–1500 Hz, z | Blade-pass lines (x+y+z), Hz |
+| --- | --- | --- |
+| 10:10 | 0.36 mg | 211.6, 224.9, 239.2, 264.5 |
+| 10:11 | 0.36 mg | 210.8, 224.1, 239.1, 263.6 |
+| 10:12 | 0.39 mg | 210.2, 223.4, 238.2, 262.7 |
+| 10:25 | 0.41 mg | 209.9, 223.0, 236.7, 262.3 |
+
+**Result: steady enough.** From 10:12 to 10:25 every line moved 0.6 % or less; from the very first capture (10:10) to 10:25, 0.8–1.0 %, most of it in the first two minutes. All captures clean (0 missing sets, 0 CRC errors). The high-frequency level is back near the 08:20 value (0.36–0.41 vs 0.57 mg at 08:50), which fits the loose-connector explanation but does not prove it. Rule for the next imbalance test: start the baseline only after the lines have held within 1 % for at least 10 minutes.
