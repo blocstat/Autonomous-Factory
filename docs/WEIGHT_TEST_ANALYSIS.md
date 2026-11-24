@@ -47,10 +47,10 @@ Spectra: Welch, Hann, 32,768 points (0.12 Hz bins), first 0.5 s skipped; each fi
 - **Detect (A-B-A).** INCONCLUSIVE if a fan's speed differs by more than 1 % between the two baselines, or fewer than 2 fans can be matched between them. Otherwise PASS if the weighted group's 1× median minus the first baseline's median is larger than the largest difference between any baseline capture and any baseline-after capture; else NOT DETECTED.
 - **Confirm (A-B-A-B-A).** PASS if **every** weighted capture's 1× is at least 3× the first baseline's median, and **every** later unweighted capture is below that same 3× threshold; else NOT DETECTED. Speed drift is printed as a warning only: the confirm rule written before the data has no drift limit, and every restart moves the fans 1–3 %.
 
-Two readings are mine and need Rami's OK before the next session:
+Two readings of the agreed wording:
 
-1. **"Back within the baseline range"** is coded as *below the 3× threshold*. Read literally (no higher than the highest of the 3 first-baseline captures), it fails about 2 times in 3 on noise alone: each new capture has a 1-in-4 chance of beating the highest of 3, and there are 6 later baseline captures. The synthetic test `test_confirm_rule_passes_when_every_round_agrees` is such a case.
-2. **"Differs between baseline and baseline-after"** (detect rule) is coded as the largest capture-to-capture difference, not the difference of the two medians. With medians only, every one of the five 24 Nov tests showed some "growth", including the three where nothing changed.
+1. **"Back within the baseline range"** is coded as *below the 3× threshold* (approved by Rami, 24 Nov 2026). Read literally (no higher than the highest of the 3 first-baseline captures), it fails about 2 times in 3 on noise alone: each new capture has a 1-in-4 chance of beating the highest of 3, and there are 6 later baseline captures. The synthetic test `test_confirm_rule_passes_when_every_round_agrees` is such a case.
+2. **"Differs between baseline and baseline-after"** (detect rule, not yet confirmed by Rami) is coded as the largest capture-to-capture difference, not the difference of the two medians. With medians only, every one of the five 24 Nov tests showed some "growth", including the three where nothing changed.
 
 ## Validation on the real 24 Nov captures
 
