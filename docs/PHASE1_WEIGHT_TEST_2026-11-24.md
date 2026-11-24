@@ -91,3 +91,33 @@ Rami's photo at 07:58 shows the two objects that were in the bags: a clear dome 
 The tape-sized imbalance on one fan of this pad is **not visible** with the sensor beside the pad: the fans' 1× lines are close to the floor and they wander more between captures than the tape could change them. This is consistent with Phase 0b (no 1× seen with the phone). A rub, as in the first test, is visible; a small imbalance on this fan, at this distance, is not.
 
 Options if imbalance is to be tested further (none done): sensor on the pad's frame instead of beside it, a heavier weight that still spins freely, or a rig with a stiffer, slower rotor than a USB fan.
+
+# Heavier-weight test, same morning (08:37–08:50)
+
+**Data origin:** `adxl355`, same sensor, mount, pad and cover-off state. USB cooling pad, **not an industrial machine**.
+
+**Raw data:** `20261124-0837..0838_adxl355_medium-weight_board-beside_r{1,2,3}.csv` and `20261124-0849..0850_adxl355_baseline-after_board-beside_r{1,2,3}.csv`. Baseline: the 08:20–08:21 tape-off captures (Rami's choice). The weight's capture note still holds the placeholder text; **what was used is to be recorded**. Same fan (middle) and position as the tape.
+
+**Criterion:** same as the small-weight test, written before the data.
+
+![heavier weight test](img/adxl355_medium_weight_test_2026-11-24.png)
+
+| | 08:20 baseline r1–r3 | 08:37 weight r1–r3 | 08:49 weight off r1–r3 |
+| --- | --- | --- | --- |
+| Data path | 0 missing, 0 CRC, 0 overruns | same | same |
+| z 800–1500 Hz, median of 1 s pieces | 0.38–0.39 mg | 0.48–0.49 mg | 0.56–0.57 mg |
+| Single bumps (one second > 2× the rest) | none | r3 at 26 s (24 mg peak) | r3 at 1 s (29 mg peak) |
+| Strongest lines 22–31 Hz (x+y+z, µg/√Hz) | 55–128 | 69–162 | 66–161 |
+| Blade-pass lines (9×) | 224, 240–242, 262–264 Hz | 227–229, 246–248 Hz | 210–216, 233–235, 248–255 Hz |
+| Envelope repetition, 800–1500 Hz | none above 35× floor | none above 31× floor | none above 20× floor |
+
+## Result: not detected
+
+- **No 1× growth beyond the normal spread:** the highest lines with the weight (up to 162 µg/√Hz, r1 only) are matched by the weight-off captures (up to 161). r2 and r3 with the weight are no higher than the baseline.
+- **No rub:** no repeating knocks (the first test's rub gave envelope lines thousands of times the floor). The high-frequency level rose 1.3× with the weight, within the 1.5× limit, but rose further (1.5×) after the weight was removed, so it is not caused by the weight.
+- **The fans slowed through the session:** blade-pass lines fell about 5 % from 08:20 to 08:37 and about 5–10 % more by 08:50, with the weight already off. Something changed in the pad or its supply during this period (cause unknown); that drift is far larger than any 1× change.
+- Two single bumps (one per capture, in r3 of the weight and weight-off sets) look like touches to the desk or board; they do not change the result.
+
+## Where this leaves imbalance testing
+
+Two weights on the middle fan, neither detected with the sensor beside the pad; a rub (first test) is detected easily. The fans' own speed changes between captures (4–10 % within an hour) are the main obstacle. A further imbalance test should first fix that (speed steady for 10 minutes before the baseline, checked from the blade-pass lines) and move the sensor onto the pad's frame.
