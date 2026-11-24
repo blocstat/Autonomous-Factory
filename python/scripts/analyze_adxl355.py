@@ -40,7 +40,7 @@ def analyse(path: Path, out_dir: Path) -> dict[str, object]:
     results = checks(capture, row)
     print(format_report(row, results))
     out_dir.mkdir(parents=True, exist_ok=True)
-    plot_noise(capture, out_dir / f"{path.stem}_noise.png")
+    plot_noise(capture, out_dir / f"{path.name.split('.')[0]}_noise.png")
     row["overall"] = overall(results)
     for check in results:
         row[f"check_{check.name.replace(' ', '_')}"] = check.result

@@ -166,6 +166,17 @@ def test_csv_round_trip_is_lossless(tmp_path):
     assert loaded.text_lines[0].startswith("AF,id,")
 
 
+def test_gzipped_capture_loads_the_same(tmp_path):
+    import gzip
+
+    path = _capture_file(tmp_path, _white_counts(8000))
+    gz = path.with_name(path.name + ".gz")
+    gz.write_bytes(gzip.compress(path.read_bytes()))
+    plain, packed = load_capture_csv(path), load_capture_csv(gz)
+    assert np.array_equal(plain.counts, packed.counts)
+    assert packed.header == plain.header and packed.text_lines == plain.text_lines
+
+
 def test_noise_density_recovers_white_noise_level():
     rng = np.random.default_rng(3)
     sd = 22.5e-6 * np.sqrt(2000.0)

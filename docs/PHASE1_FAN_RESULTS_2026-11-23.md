@@ -15,7 +15,7 @@
 | Can it see each fan separately? | **Yes.** Three families of lines, one per fan, at 23.8, 25.2 and 25.7 Hz shaft speed (about 1,430, 1,510 and 1,545 RPM). |
 | Is the blade-pass tone visible? | **Yes.** 9× each fan's speed: 214, 227 and 232 Hz. The phone could not see it (its limit was 210 Hz). |
 | Is the 1× (once per turn) line visible? | **No.** Same as with the phone. At 23.8–25.7 Hz the fans-on level is no higher than fans-off. |
-| Is fans-on vibration steady? | **Not yet.** z level at 80–800 Hz rose from 4.7 to 7.8 mg over the 6 minutes of fans-on captures. Cause unknown. |
+| Is fans-on vibration steady? | **After about 5 minutes, yes.** From cold the fans speed up by several percent as they warm, so their lines move across the board's resonances and the level changes. From 5 to 10 minutes it holds at 8.0 mg ±3 % (10-minute run below). That explains the 65 % rise in the first session. |
 
 ## Setup (as recorded)
 
@@ -30,6 +30,7 @@
 | `2056_on_r1` | Fans on, 30 s. A first try; the next file repeats `r1`. Kept, not used in the mean spectrum. |
 | `2057_on_r1`, `2058_on_r2`, `2058_on_r3` | Fans on, 30 s each, nothing touched. |
 | `2100_unplug-test_r1` | 60 s. Fans on, pad unplugged at about 30.8 s. |
+| `2156_warmup_r1` (`.csv.gz`) | 600 s, after the fans had been off for at least 30 minutes. Capture started with the pad unplugged; Rami plugged it in when streaming began (fans start at about 4 s). Stored gzipped (23 MB instead of 61 MB). |
 
 ## Data path
 
@@ -80,16 +81,26 @@ Each line is 7–110× above the fans-off floor at the same frequency; the 1× l
 
 z RMS at 80–600 Hz is 7.6 mg with the fans on (2–29 s) and 0.37 mg after (33–60 s). Below 27 Hz nothing changes (ratios 1.0–1.3). This confirms that every band in the table above comes from the fans and not from the room.
 
-## Repeatability
+## Repeatability and warm-up
 
-z RMS at 80–800 Hz, in capture order: on r1 (2056) 4.7 mg, on r1 (2057) 5.7, r2 6.5, r3 7.3, unplug-test fans-on part 7.8. It rose about 65 % in 6 minutes, and kept rising in every capture. Possible causes: the fans warming up and changing speed (they beat against each other at 0.5–2 Hz), or the tape holding the sensor loosening. This matters: an anomaly detector must not flag a fan that is just warming up. Not explained yet.
+In the first session, z RMS at 80–800 Hz rose in capture order: on r1 (2056) 4.7 mg, on r1 (2057) 5.7, r2 6.5, r3 7.3, unplug-test fans-on part 7.8. Those captures started about 1 minute after the fans were switched on.
+
+A 10-minute run from cold (`2156_warmup_r1`) shows why:
+
+![warm-up](img/adxl355_warmup_2026-11-23.png)
+
+- **Data path:** 2,410,784 sets, 0 missing, 0 CRC errors, 0 overruns, 0 dropped words, 0 SPI errors over 10 minutes. Output data rate 4009.7 Hz, 23.6–24.0 °C.
+- **Level:** about 5 mg at 1–2 minutes, rising steadily to about 8 mg by 5 minutes, then **8.0 mg ±3 % (7.65–8.23 mg in 5 s windows) from 5 to 10 minutes**. The first session's values fall on the same curve.
+- **Why:** every blade-pass line moves up in frequency during the first 5 minutes, then flattens: the fans speed up as they warm, by roughly 4–8 % (read from the plot, not measured precisely). As the lines move, they pass over the board's resonances, so the energy moves between bands: from 50–110 s to 450–600 s, 110–135 Hz rose 6×, 185–240 Hz 3×, while 135–185 Hz fell to 0.6×. The total level is the net of that.
+- **Not the mount:** a loosening sensor would not make the fan lines move, and the level is flat for the last 5 minutes.
+- **Small events:** at about 510 s all lines dip together (probably the pad's supply: all three fans change speed at once), and at about 545 s there is a short broadband stripe (probably a knock on the desk or board). Neither moved the level by more than about 5 %.
 
 ## What this means for the MVP
 
 - The ADXL355 path works end to end: no lost data, a stable clock, and a clear fan signal. The phone could not get this.
 - A fan's speed can be read from its lines (2×, 4×, 6×, 9×) even though its 1× line is invisible from this position. Imbalance usually shows at 1×, so detecting imbalance needs the sensor closer to the fan (on the pad's frame) or a heavier imbalance. Not tested.
-- Before any "normal vs abnormal" test, the fans-on level has to be steady. That needs a longer run.
+- **Warm-up rule:** a baseline for this pad must be taken after at least 5 minutes of running. In the first 5 minutes the level changes by up to 70 % with nothing wrong.
+- **Speed is not fixed:** the fans' speeds move by several percent with temperature and supply, so frequency features must follow the lines (track each fan's peak) instead of watching fixed frequency bins. A fixed-bin detector would flag normal warm-up.
+- These rules come from one pad on one desk. They are not general claims about machines.
 
-## Suggested next test (not done)
-
-One 10-minute capture with the fans on from cold, sensor untouched, after pressing the tape down: `--condition warmup --seconds 600`. It shows whether the level settles, and whether speed drift explains it.
+To re-check the long capture: `python python/scripts/analyze_adxl355.py data/measured/adxl355/raw/20261123-2156_adxl355_warmup_board-beside_r1.csv.gz` (the loader reads `.csv.gz` directly).

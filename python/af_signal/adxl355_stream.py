@@ -18,6 +18,7 @@ The firmware also sends text lines that start with "AF," and end with "\\n".
 from __future__ import annotations
 
 import binascii
+import gzip
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
@@ -315,7 +316,8 @@ def load_capture_csv(path: Path) -> LoadedCapture:
     header: dict[str, str] = {}
     text_lines: list[str] = []
     skip = 0
-    with path.open("r", encoding="utf-8") as handle:
+    opener = gzip.open if path.suffix == ".gz" else open  # long captures are stored gzipped
+    with opener(path, "rt", encoding="utf-8") as handle:
         for line in handle:
             if not line.startswith("#"):
                 break
