@@ -57,12 +57,12 @@ python python/scripts/weight_test.py --axis z --band 13 19 \
 | NOT DETECTED | Any screw-on capture below 3×, or any later no-screw capture at or above 3×. |
 | INCONCLUSIVE | Any capture with a missing set, CRC error, sequence gap, restart, overrun or dropped word; or a rub (see below); or every capture of a block is a bump. |
 | Bumps | A capture whose 800–1500 Hz z kurtosis is above 5 (a knock on the desk) is reported and left out of the decision. |
-| Rub guard | Rub = every screw-on block's 800–1500 Hz z level (median of 1 s pieces) is more than 1.5× **every** no-screw block's level. See "One rule to confirm" below. |
+| Rub guard | Rub = every screw-on block's 800–1500 Hz z level (median of 1 s pieces) is more than 1.5× **every** no-screw block's level (Rami's choice, see below). |
 | Reported only | The same command with `--band 26 34` (the line at about twice 15 Hz), the tracked fan speeds, x and y. None of these changes the verdict. |
 
-## One rule to confirm before the session
+## Rub guard choice (decided by Rami, 25 Nov 2026, 17:14 Toronto: every no-screw block)
 
-The 25 Nov plan compared the rub level with the **baseline block only**, and r6 tripped it at 1.54× (limit 1.5×). But no-screw blocks that night also varied up to 1.45× (screw-off round 1: 5.9 mg against 4.1 mg baseline), with no knocks (kurtosis 3.0–3.4). On the frame, the high band moves that much without any rub. The script compares each screw-on block with **every** no-screw block instead. That still catches a real rub (24 Nov: 8.7×) and does not trip on the normal spread. **Rami decides which one applies;** the code currently does the second.
+The 25 Nov plan compared the rub level with the **baseline block only**, and r6 tripped it at 1.54× (limit 1.5×). But no-screw blocks that night also varied up to 1.45× (screw-off round 1: 5.9 mg against 4.1 mg baseline), with no knocks (kurtosis 3.0–3.4). On the frame, the high band moves that much without any rub. The script compares each screw-on block with **every** no-screw block instead. That still catches a real rub (24 Nov: 8.7×) and does not trip on the normal spread. **Rami chose the second** (compare with every no-screw block), which is what the code does.
 
 ## Dry run on the 25 Nov captures (not evidence)
 
