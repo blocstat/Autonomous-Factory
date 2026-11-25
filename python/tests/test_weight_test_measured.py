@@ -78,3 +78,25 @@ def test_left_fan_screw_1x_grows_but_inconclusive_by_drift():
     assert weighted.level > 3 * report.groups[0].level
     # The line sits at 26.3-26.6 Hz in the two clear captures (r1, r3).
     assert sorted(c.level_freq_hz for c in weighted.captures)[0] == pytest.approx(26.3, abs=0.2)
+
+
+def test_frame_mount_night_fixed_band_dry_run():
+    """25 Nov frame-mount captures (MEASURED). The 13-19 Hz band was chosen after seeing
+    these captures, so this PASS is a dry run of the code, not evidence; the evidence must
+    come from a fresh session analysed with the same command."""
+    off1 = _files("20261125-0052", "20261125-0053")
+    on1 = _files("20261125-0102", "20261125-0103")
+    off2 = _files("20261125-0112", "20261125-0113", "20261125-0129", "20261125-0130")
+    on2 = _files("20261125-0149", "20261125-0150")
+    off3 = _files("20261125-0201", "20261125-0202")
+    captures = (
+        [capture_from_file(p, "off") for p in off1]
+        + [capture_from_file(p, "on") for p in on1]
+        + [capture_from_file(p, "off") for p in off2]
+        + [capture_from_file(p, "on") for p in on2]
+        + [capture_from_file(p, "off") for p in off3]
+    )
+    report = analyse(captures, axis="z", band=(13.0, 19.0))
+    assert report.groups[0].level * 1e6 == pytest.approx(653, abs=5)
+    assert report.verdict == "PASS"
+    assert report.rub_verdict == NOT_DETECTED

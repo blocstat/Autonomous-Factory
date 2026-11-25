@@ -78,6 +78,7 @@ RUB_BAND_HZ = (800.0, 1500.0)
 
 # Decision rules agreed before the data (project thread, 24 Nov 2026).
 DRIFT_LIMIT = 0.01
+BUMP_KURTOSIS = 5.0  # 800-1500 Hz z kurtosis above this = a bump; left out of the confirm rule
 RUB_LIMIT = 1.5
 CONFIRM_FACTOR = 3.0
 
@@ -92,7 +93,7 @@ QUALITY_KEYS = (
 )
 OFF_CONDITIONS = ("baseline", "baseline-after", "off", "screw-off", "weight-off", "sham-restart")
 # Captures that belong to no weight round; give them with --off/--on if really wanted.
-NOT_A_ROUND = ("steady-check", "fans-off", "rest", "warmup", "unplug-test")
+NOT_A_ROUND = ("steady-check", "fans-off", "tap-test", "rest", "warmup", "unplug-test")
 
 PASS = "PASS"
 NOT_DETECTED = "NOT DETECTED"
@@ -125,6 +126,7 @@ class CaptureResult:
     freqs: np.ndarray
     asd: np.ndarray  # (F, 3) in g/sqrt(Hz)
     rub_g: tuple[float, float, float]  # x, y, z
+    kurtosis_z: float = float("nan")  # of the 800-1500 Hz z signal (3 = steady noise)
     one_x: list[dict] = field(default_factory=list)  # one entry per tracked speed
     level: float = float("nan")  # strongest 1x on the decision axis, g/sqrt(Hz)
     level_freq_hz: float = float("nan")
@@ -170,6 +172,7 @@ class Report:
     verdict: str
     reasons: list[str]
     notes: list[str]
+    band: tuple[float, float] | None = None
 
 
 # ---------------------------------------------------------------- loading
@@ -242,8 +245,8 @@ def spectrum(g: np.ndarray, rate_hz: float) -> tuple[np.ndarray, np.ndarray]:
     return freqs, np.sqrt(psd)
 
 
-def rub_level(g: np.ndarray, rate_hz: float) -> tuple[float, float, float]:
-    """Median over 1 s pieces of the 800-1500 Hz RMS, per axis, in g."""
+def rub_level(g: np.ndarray, rate_hz: float) -> tuple[tuple[float, float, float], float]:
+    """800-1500 Hz: median over 1 s pieces of the RMS per axis (g), and z kurtosis."""
     sos = signal.butter(4, RUB_BAND_HZ, btype="bandpass", fs=rate_hz, output="sos")
     filtered = signal.sosfiltfilt(sos, np.asarray(g, dtype=np.float64), axis=0)
     filtered = filtered[int(round(SETTLE_S * rate_hz)) :]
@@ -253,7 +256,9 @@ def rub_level(g: np.ndarray, rate_hz: float) -> tuple[float, float, float]:
         raise ValueError("capture too short for the rub band (need 3 s)")
     pieces = filtered[: count * piece].reshape(count, piece, 3)
     rms = np.sqrt(np.mean(pieces**2, axis=1))
-    return tuple(float(v) for v in np.median(rms, axis=0))
+    z = filtered[:, 2] - filtered[:, 2].mean()
+    kurt = float(np.mean(z**4) / np.mean(z**2) ** 2)
+    return tuple(float(v) for v in np.median(rms, axis=0)), kurt
 
 
 def comb_score(freqs: np.ndarray, asd: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -337,12 +342,26 @@ def measure_group(run: Sequence[CaptureInput]) -> Group:
             quality_problems=c.quality_problems,
             freqs=freqs,
             asd=asd,
-            rub_g=rub_level(c.g, c.rate_hz),
+            rub_g=(0.0, 0.0, 0.0),
         )
+        r.rub_g, r.kurtosis_z = rub_level(c.g, c.rate_hz)
         results.append(r)
     group = Group(state=run[0].state, captures=results)
     group.speeds_hz, group.scores = fan_speeds(*_mean_spectrum(results))
     return group
+
+
+def measure_band(group: Group, band: tuple[float, float], axis: str) -> None:
+    """Fixed-band level: the peak on ``axis`` within ``band`` (written down before the data)."""
+    k = AXES.index(axis)
+    for r in group.captures:
+        mask = (r.freqs >= band[0]) & (r.freqs <= band[1])
+        if not mask.any():
+            raise ValueError(f"no spectrum bins in {band}")
+        i = int(np.argmax(np.where(mask, r.asd[:, k], -np.inf)))
+        r.level = float(r.asd[i, k])
+        r.level_freq_hz = float(r.freqs[i])
+        r.one_x = [{a: float(np.max(r.asd[mask, j])) for j, a in enumerate(AXES)}]
 
 
 def measure_one_x(group: Group, windows: Sequence[float], axis: str) -> None:
@@ -355,9 +374,16 @@ def measure_one_x(group: Group, windows: Sequence[float], axis: str) -> None:
 
 
 def analyse(
-    captures: Sequence[CaptureInput], axis: str = "y", rule: str = "auto"
+    captures: Sequence[CaptureInput],
+    axis: str = "y",
+    rule: str = "auto",
+    band: tuple[float, float] | None = None,
 ) -> Report:
-    """Measure every capture, then apply the fixed rules. Captures in time order."""
+    """Measure every capture, then apply the fixed rules. Captures in time order.
+
+    With ``band`` (a fixed frequency band written down before the data), the level is
+    the peak in that band instead of the tracked 1x, and the confirm rule is used.
+    """
     if axis not in AXES:
         raise ValueError(f"axis must be one of {AXES}")
     if rule not in ("auto", "detect", "confirm"):
@@ -375,6 +401,12 @@ def analyse(
             "need off / on / off (or off / on / off / on / off ...), starting and ending "
             f"without the weight; got {' / '.join(states)}"
         )
+    if band is not None:
+        if not 0 < band[0] < band[1]:
+            raise ValueError("band must be (low, high) with 0 < low < high")
+        if rule == "detect":
+            raise ValueError("a fixed band uses the confirm rule")
+        rule = "confirm"
     if rule == "auto":
         rule = "detect" if on_count == 1 else "confirm"
     if rule == "detect" and on_count != 1:
@@ -383,11 +415,16 @@ def analyse(
     groups = [measure_group(run) for run in runs]
     # Every capture is measured over the same windows: each speed tracked in any group of
     # this test. On and off captures are then compared like for like.
-    windows = sorted({s for g in groups for s in g.speeds_hz})
-    if not windows:
-        raise ValueError("no fan speed could be tracked in any group; check the captures")
-    for g in groups:
-        measure_one_x(g, windows, axis)
+    if band is not None:
+        for g in groups:
+            measure_band(g, band, axis)
+    else:
+        windows = sorted({s for g in groups for s in g.speeds_hz})
+        if not windows:
+            raise ValueError("no fan speed could be tracked in any group; check the captures")
+        for g in groups:
+            measure_one_x(g, windows, axis)
+    measure = f"{band[0]:g}-{band[1]:g} Hz peak" if band is not None else "1x"
     off_idx = [i for i, g in enumerate(groups) if g.state == "off"]
     on_idx = [i for i, g in enumerate(groups) if g.state == "on"]
     drifts = []
@@ -450,12 +487,25 @@ def analyse(
             verdict = PASS if grown else NOT_DETECTED
             reasons.append(one_x_note)
     else:
-        threshold = CONFIRM_FACTOR * first.level
-        weak = [r for i in on_idx for r in groups[i].captures if not r.level >= threshold]
-        high = [r for i in off_idx[1:] for r in groups[i].captures if not r.level < threshold]
+        bumped = [r for g in groups for r in g.captures if r.kurtosis_z > BUMP_KURTOSIS]
+        for r in bumped:
+            notes.append(
+                f"{r.name}: bump (800-1500 Hz z kurtosis {r.kurtosis_z:.1f} > {BUMP_KURTOSIS:g}), "
+                "left out of the decision"
+            )
+        kept = [[r for r in g.captures if r.kurtosis_z <= BUMP_KURTOSIS] for g in groups]
+        empty = [n + 1 for n, k in enumerate(kept) if not k]
+        if empty:
+            reasons.append(f"every capture of group(s) {empty} is a bump")
+            base_level = first.level
+        else:
+            base_level = float(np.median([r.level for r in kept[off_idx[0]]]))
+        threshold = CONFIRM_FACTOR * base_level
+        weak = [r for i in on_idx for r in kept[i] if not r.level >= threshold]
+        high = [r for i in off_idx[1:] for r in kept[i] if not r.level < threshold]
         notes.append(
-            f"1x ({axis}): weighted captures need >= {_ug(threshold)} ug/rtHz "
-            f"({CONFIRM_FACTOR:g}x the first baseline's median {_ug(first.level)}); later "
+            f"{measure} ({axis}): weighted captures need >= {_ug(threshold)} ug/rtHz "
+            f"({CONFIRM_FACTOR:g}x the first baseline's median {_ug(base_level)}); later "
             f"unweighted captures need < {_ug(threshold)}"
         )
         for d in drifts:
@@ -469,9 +519,13 @@ def analyse(
         elif weak or high:
             verdict = NOT_DETECTED
             for r in weak:
-                reasons.append(f"{r.name}: 1x {_ug(r.level)} < {_ug(threshold)} (weighted, too low)")
+                reasons.append(
+                    f"{r.name}: {measure} {_ug(r.level)} < {_ug(threshold)} (weighted, too low)"
+                )
             for r in high:
-                reasons.append(f"{r.name}: 1x {_ug(r.level)} >= {_ug(threshold)} (unweighted, not back)")
+                reasons.append(
+                    f"{r.name}: {measure} {_ug(r.level)} >= {_ug(threshold)} (unweighted, not back)"
+                )
         else:
             verdict = PASS
             reasons.append(
@@ -490,6 +544,7 @@ def analyse(
         verdict=verdict,
         reasons=reasons,
         notes=notes,
+        band=band,
     )
 
 
@@ -512,10 +567,13 @@ def format_report(report: Report) -> str:
             f"data_origin: {report.data_origin.upper()} -- NOT A MEASUREMENT. Results describe "
             "generated signals only."
         )
-    out.append(
-        f"rule: {report.rule}   decision axis: {report.axis}   1x = strongest peak within "
-        f"+/-{ONE_X_HALF_WIDTH_HZ} Hz of a tracked fan speed"
-    )
+    if report.band is not None:
+        measure = f"{report.band[0]:g}-{report.band[1]:g} Hz peak"
+        how = f"level = peak in the fixed band {report.band[0]:g}-{report.band[1]:g} Hz"
+    else:
+        measure = "1x"
+        how = (f"1x = strongest peak within +/-{ONE_X_HALF_WIDTH_HZ} Hz of a tracked fan speed")
+    out.append(f"rule: {report.rule}   decision axis: {report.axis}   {how}")
     out.append("")
     for n, group in enumerate(report.groups, start=1):
         label = "weight ON " if group.state == "on" else "weight off"
@@ -525,7 +583,7 @@ def format_report(report: Report) -> str:
         ) or "none tracked"
         out.append(f"[{n}] {label}  fans: {speeds}")
         out.append(
-            f"    rub z median {group.rub_z * 1e3:.2f} mg   1x {report.axis} median "
+            f"    rub z median {group.rub_z * 1e3:.2f} mg   {measure} {report.axis} median "
             f"{_ug(group.level)} ug/rtHz"
         )
         for r in group.captures:
@@ -534,10 +592,10 @@ def format_report(report: Report) -> str:
                 f"{a}={_ug(max((m[a] for m in r.one_x), default=float('nan')))}" for a in AXES
             )
             out.append(
-                f"    {r.name}: 1x {per_axis} ug/rtHz ({report.axis} peak at "
+                f"    {r.name}: {measure} {per_axis} ug/rtHz ({report.axis} peak at "
                 f"{r.level_freq_hz:.2f} Hz); rub x/y/z "
                 + "/".join(f"{v * 1e3:.2f}" for v in r.rub_g)
-                + f" mg{flag}"
+                + f" mg, kurtosis z {r.kurtosis_z:.1f}{flag}"
             )
     out.append("")
     for d in report.drifts:
@@ -550,6 +608,6 @@ def format_report(report: Report) -> str:
     )
     out.extend(report.notes)
     out.append("")
-    out.append(f"IMBALANCE (1x) VERDICT: {report.verdict}")
+    out.append(f"VERDICT ({measure}, {report.axis}): {report.verdict}")
     out.extend(f"  - {reason}" for reason in report.reasons)
     return "\n".join(out)

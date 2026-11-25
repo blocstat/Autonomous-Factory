@@ -19,6 +19,8 @@ Or name the groups yourself, in order (needed when a baseline is reused):
         --off  data/measured/adxl355/raw/20261124-115[23]_*.csv
 
 One weighted group uses the "detect" rule; two or more use the "confirm" rule.
+With --band LOW HIGH the level is the peak in that fixed band and the confirm
+rule is used (pre-registered frame-mount test: --axis z --band 13 19).
 Exit code: 0 PASS, 1 NOT DETECTED, 2 INCONCLUSIVE, 3 bad input.
 """
 
@@ -63,6 +65,9 @@ def main(argv: list[str] | None = None) -> int:
                         help="axis the decision uses (fix it before the data; default y)")
     parser.add_argument("--rule", choices=("auto", "detect", "confirm"), default="auto",
                         help="auto: detect for one weighted group, confirm for two or more")
+    parser.add_argument("--band", nargs=2, type=float, metavar=("LOW_HZ", "HIGH_HZ"),
+                        help="decide on the peak in this fixed band (confirm rule); the band "
+                             "must be written down before the data")
     args = parser.parse_args(argv)
 
     if args.files and args.groups:
@@ -74,7 +79,8 @@ def main(argv: list[str] | None = None) -> int:
             captures = [capture_from_file(p) for p in sorted(args.files, key=lambda p: p.name)]
         else:
             parser.error("no captures given")
-        report = analyse(captures, axis=args.axis, rule=args.rule)
+        band = tuple(args.band) if args.band else None
+        report = analyse(captures, axis=args.axis, rule=args.rule, band=band)
     except (OSError, ValueError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 3

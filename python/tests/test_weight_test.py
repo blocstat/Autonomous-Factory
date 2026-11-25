@@ -42,6 +42,8 @@ def synthetic_capture(
     one_x_g=(ONE_X_BASE_G,) * 3,
     rub_g: float = 0.0,
     problems: tuple[str, ...] = (),
+    z_tone: tuple[float, float] | None = None,
+    bump_g: float = 0.0,
 ) -> CaptureInput:
     rng = np.random.default_rng(seed)
     n = int(DURATION_S * RATE)
@@ -60,6 +62,15 @@ def synthetic_capture(
         phase = (t * 13.7) % 1.0
         burst = np.exp(-phase / 0.2) * np.sin(2 * np.pi * 1100.0 * t)
         g += rub_g * burst[:, None]
+    if z_tone:
+        g[:, 2] += z_tone[1] * np.sin(2 * np.pi * z_tone[0] * t)
+    if bump_g:
+        # One knock on the desk at 10 s: a short 1 kHz burst.
+        start = int(10 * RATE)
+        tt = t[start : start + 400] - t[start]
+        g[start : start + 400, :] += (bump_g * np.exp(-tt / 0.01) * np.sin(2 * np.pi * 1000 * tt))[
+            :, None
+        ]
     g[:, 2] += 1.0  # gravity
     return CaptureInput(
         name=name,
@@ -244,3 +255,75 @@ def test_grouping_and_header_helpers():
     assert "restarts not recorded" in quality_problems(
         {k: v for k, v in clean.items() if k != "restarts"}
     )
+
+
+# ---- fixed band (pre-registered frame-mount test: z, 13-19 Hz) -- SYNTHETIC ----
+
+BAND = (13.0, 19.0)
+LOW_LINE = (15.0, 2e-3)  # a 2 mg line at 15 Hz on z, made up
+
+
+def test_fixed_band_passes_when_low_line_comes_and_goes():
+    captures = (
+        round_of("off", 1)
+        + round_of("on", 10, z_tone=LOW_LINE)
+        + round_of("off", 20)
+        + round_of("on", 30, z_tone=LOW_LINE)
+        + round_of("off", 40)
+    )
+    report = analyse(captures, axis="z", band=BAND)
+    assert report.rule == "confirm"
+    assert report.verdict == PASS
+    for capture in report.groups[1].captures:
+        assert capture.level_freq_hz == pytest.approx(15.0, abs=0.15)
+
+
+def test_fixed_band_one_round_uses_confirm_rule():
+    captures = round_of("off", 1) + round_of("on", 10, z_tone=LOW_LINE) + round_of("off", 20)
+    report = analyse(captures, axis="z", band=BAND)
+    assert report.rule == "confirm"
+    assert report.verdict == PASS
+
+
+def test_fixed_band_not_detected_if_line_stays_after_removal():
+    captures = (
+        round_of("off", 1)
+        + round_of("on", 10, z_tone=LOW_LINE)
+        + round_of("off", 20, z_tone=LOW_LINE)
+        + round_of("on", 30, z_tone=LOW_LINE)
+        + round_of("off", 40)
+    )
+    assert analyse(captures, axis="z", band=BAND).verdict == NOT_DETECTED
+
+
+def test_fixed_band_ignores_lines_outside_the_band():
+    # The same line at 21 Hz is outside 13-19 Hz, so nothing is detected.
+    captures = round_of("off", 1) + round_of("on", 10, z_tone=(21.0, 2e-3)) + round_of("off", 20)
+    assert analyse(captures, axis="z", band=BAND).verdict == NOT_DETECTED
+
+
+def test_bumped_capture_is_left_out_of_the_confirm_rule():
+    # A desk knock in one screw-off capture that also carries the line: it is reported
+    # and left out, so the remaining captures decide.
+    knocked = synthetic_capture("off-knock", "off", 77, z_tone=LOW_LINE, bump_g=0.3)
+    captures = (
+        round_of("off", 1)
+        + round_of("on", 10, z_tone=LOW_LINE)
+        + round_of("off", 20, repeats=2)
+        + [knocked]
+        + round_of("on", 30, z_tone=LOW_LINE)
+        + round_of("off", 40)
+    )
+    report = analyse(captures, axis="z", band=BAND)
+    bumped = [c for g in report.groups for c in g.captures if c.name == "off-knock"][0]
+    assert bumped.kurtosis_z > 5
+    assert any("off-knock" in note and "bump" in note for note in report.notes)
+    assert report.verdict == PASS
+
+
+def test_rejects_bad_band():
+    captures = round_of("off", 1) + round_of("on", 10) + round_of("off", 20)
+    with pytest.raises(ValueError, match="band"):
+        analyse(captures, axis="z", band=(19.0, 13.0))
+    with pytest.raises(ValueError, match="confirm rule"):
+        analyse(captures, axis="z", rule="detect", band=BAND)

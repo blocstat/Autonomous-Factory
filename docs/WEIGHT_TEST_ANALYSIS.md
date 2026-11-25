@@ -29,6 +29,12 @@ python python/scripts/weight_test.py \
 
 One weighted group (off / on / off) uses the **detect** rule; two or more (off / on / off / on / off) use the **confirm** rule. `--rule` forces one, `--axis` changes the decision axis (default `y`; choose it before the data). Exit code: 0 PASS, 1 NOT DETECTED, 2 INCONCLUSIVE, 3 bad input. About 2 s for 15 captures.
 
+## Fixed-band mode (added 25 Nov)
+
+`--band LOW HIGH` replaces the tracked 1× with the peak in one fixed band, and always uses the confirm rule. It exists for tests whose band was written down before the data, as in `docs/PHASE1_PREREG_FRAME_15HZ.md` (`--axis z --band 13 19`). With a band picked after seeing the data, the verdict means nothing.
+
+In the confirm rule (both modes), a capture whose 800–1500 Hz z kurtosis is above 5 (a knock) is reported and left out of the decision, as planned in PR #8. If a whole block is knocks, the verdict is INCONCLUSIVE.
+
 ## What it measures
 
 | Quantity | How |
@@ -78,7 +84,7 @@ The script agrees with every written conclusion. Where the doc said "not detecte
 
 ```bash
 cd autonomous-factory/python
-python -m pytest -q tests/test_weight_test.py tests/test_weight_test_measured.py   # 19 passed
+python -m pytest -q tests/test_weight_test.py tests/test_weight_test_measured.py   # 25 passed, 1 skipped (the 25 Nov dry run needs PR #8's captures)
 python -m pytest -q                                                                  # whole suite, all pass
 cd ..
 R=data/measured/adxl355/raw
