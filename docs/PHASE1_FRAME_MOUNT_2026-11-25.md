@@ -55,11 +55,6 @@ With the sensor on the frame, the screw produces a much larger change than besid
 
 Nothing here shows that this works on an industrial machine, or that it predicts anything.
 
-## Proposed next step (not done, needs Rami's OK)
+## Next step
 
-Same Part B protocol on the frame mount, with these rules written before the data:
-- **Measure:** the z peak in 13–19 Hz and in 26–34 Hz (the "half" and "1×" bands).
-- **Confirmed** if every screw-on capture is ≥ 3× the baseline median in the 13–19 Hz band, and every later no-screw capture is < 3×.
-- **Rub guard and bumps:** as before.
-- **Live check:** Claude checks each block's rub level during the session, so a tripped guard can be fixed at once.
-- **Extra control (optional, 10 min):** fans off, tap the pad's corner lightly. This shows whether the pad has a rocking resonance near 15 Hz.
+The pre-registered rerun on the frame mount (z peak in 13–19 Hz, the confirm rule, and the rub guard) is defined in one place: `docs/PHASE1_PREREG_FRAME_15HZ.md` in PR #9, with a `--band` mode in `python/scripts/weight_test.py`. This note does not restate those rules. Use the same block order as Part B, with the optional fans-off tap test at the end.
