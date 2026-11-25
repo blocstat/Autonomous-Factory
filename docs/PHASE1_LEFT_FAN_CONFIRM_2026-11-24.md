@@ -45,8 +45,8 @@ With the sensor beside the pad, a taped screw on the nearest fan is **sometimes*
 
 This is the result Part B was planned for: mount the sensor on the pad's frame, closer to the fan's own structure, and see whether the line becomes consistent.
 
-## Decisions before Part B (for Rami)
+## Decisions before Part B (Rami, 25 November)
 
-1. **The baseline line at about 27.3 Hz.** Keep the script's tracked 1× windows as the decision measure (as now), or widen them so that a fan line in the baseline near the screw-on frequency is always included? Widening makes the test stricter. Either choice has to be made before Part B's data.
-2. **TV off and no dishwasher or washer running** for the whole session (proposed above). Both raised the 800–1500 Hz band tonight, and a washer spin showed up at 20.2 Hz in Phase 0b.
-3. **Take the 15-minute steady check** this time. It costs 10 minutes.
+1. **The baseline line at about 27.3 Hz:** the decision measure stays as it is (the script's tracked 1× windows). The windows are **not** widened.
+2. **Household sources:** TV off, and no dishwasher or washer running, for the whole session. Both raised the 800–1500 Hz band tonight, and a washer spin showed up at 20.2 Hz in Phase 0b.
+3. **Steady check:** take both the 5-minute and the 15-minute captures.

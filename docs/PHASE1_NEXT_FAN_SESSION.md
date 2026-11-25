@@ -17,7 +17,7 @@ Do Part B only after Part A, whatever Part A's result: Part A's numbers are the 
 
 ## Rules decided before the data
 
-These are fixed before any capture, once Rami has approved them. The analysis script (PR #9) applies the same rules; where it needs a precise definition (how a fan's line is tracked, how the floor is computed), the script's definition counts, so the rule is applied the same way every time.
+These are fixed before any capture, once Rami has approved them. The analysis script (PR #9) applies the same rules; where it needs a precise definition (how a fan's line is tracked, how the floor is computed), the script's definition counts, so the rule is applied the same way every time. Rami decided on 25 November to keep the script's tracked 1× windows as they are, without widening them to include baseline lines near the screw-on frequency.
 
 **Measure.** For each capture: the left fan's 1× line on the y axis, **tracked from that fan's speed** as PR #9 does (µg/√Hz), its frequency, the 800–1500 Hz z level (median of 1 s pieces), the 800–1500 Hz kurtosis, and the fans' blade-pass lines. The fixed 25.5–27 Hz band used in PR #7 was chosen after seeing that data, so it is reported alongside for comparison but does not decide the outcome.
 
@@ -60,6 +60,8 @@ ls /dev/cu.usb*                      # expect /dev/cu.usbserial-0001
 
 - The board already has the step 3 stream firmware; no flashing needed.
 - Close `idf.py monitor` if it is open (only one program can hold the port).
+- **TV off, and no dishwasher or washer running**, for the whole session (Rami, 25 Nov: both disturbed the 24 Nov evening captures).
+- Take **both** steady-check captures, at 5 and at 15 minutes (Rami, 25 Nov).
 - Check the fan connectors inside the pad are pressed fully in (the 24 Nov slowing was probably a loose one).
 - Have ready: taped screw (or putty), pencil, glasses, phone for photos, a clock.
 
