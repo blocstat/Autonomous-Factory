@@ -100,3 +100,34 @@ def test_frame_mount_night_fixed_band_dry_run():
     assert report.groups[0].level * 1e6 == pytest.approx(653, abs=5)
     assert report.verdict == "PASS"
     assert report.rub_verdict == NOT_DETECTED
+
+
+def test_prereg_frame_mount_rerun_not_detected():
+    """25 Nov 2026 evening, the pre-registered rerun (MEASURED, docs/PHASE1_PREREG_FRAME_15HZ.md).
+    The 22:00 baseline r3 failed the data path and is replaced by its 22:03 re-take, per the
+    amendment. Every screw-on capture passes, but the sham restart reads 3.4-3.5x the
+    baseline, so the pre-registered verdict is NOT DETECTED."""
+    blocks = [
+        ("off", ["20261125-2159", "20261125-2200", "20261125-2203"]),
+        ("on", ["20261125-2211", "20261125-2212"]),
+        ("off", ["20261125-2222", "20261125-2223", "20261125-2232", "20261125-2233"]),
+        ("on", ["20261125-2242", "20261125-2243"]),
+        ("off", ["20261125-2254", "20261125-2255"]),
+    ]
+    captures = []
+    for state, prefixes in blocks:
+        for p in _files(*prefixes):
+            if p.name == "20261125-2200_adxl355_baseline_frame-left_r3.csv":
+                continue  # data-path failure, re-taken at 22:03
+            if "steady-check" in p.name:
+                continue
+            captures.append(capture_from_file(p, state))
+    assert len(captures) == 18
+    report = analyse(captures, axis="z", band=(13.0, 19.0))
+    assert report.groups[0].level * 1e6 == pytest.approx(493, abs=5)
+    assert report.verdict == NOT_DETECTED
+    assert report.rub_verdict == NOT_DETECTED
+    threshold = 3 * report.groups[0].level
+    assert all(c.level >= threshold for g in report.groups if g.state == "on" for c in g.captures)
+    shams = [c for c in report.groups[2].captures if "sham-restart" in c.name]
+    assert len(shams) == 3 and all(c.level >= threshold for c in shams)
