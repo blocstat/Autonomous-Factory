@@ -77,3 +77,7 @@ cd autonomous-factory/python
 python -m pytest -q tests/test_weight_test.py        # synthetic, includes 6 fixed-band tests
 python -m pytest -q tests/test_weight_test_measured.py  # real captures; the 25 Nov dry run skips if those files are not in the checkout
 ```
+
+## Amendments (written during the session, before the decision measure was looked at)
+
+- **2026-11-25 22:06 Toronto.** Baseline r3 at 22:00 had a data-path error (32 missing sets, 1 CRC error, 1 sequence gap). As planned in PR #8 ("a capture that fails is re-taken; both files are kept"), Rami re-took it at 22:03 (`20261125-2203_..._baseline_frame-left_r3.csv`, clean). Rule, applying to the whole session: a capture that fails the data path is kept on disk but left out of the decision command, and its clean re-take is used instead. The choice is made on the data-path counters only, never on the 13–19 Hz value. Only data path, rub band and kurtosis are checked between blocks. The 13–19 Hz values are first computed when the decision command runs at the end.
