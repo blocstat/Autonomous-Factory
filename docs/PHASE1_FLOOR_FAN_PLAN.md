@@ -49,7 +49,7 @@ The label gives no speed. A small AC fan motor like this usually runs at about 9
 ## Setup
 
 - **Fan.** On the floor where it is now, the head level (tilt at 0°). Mark the four feet with tape, so the fan goes back to the same place. Nobody walks near it during a capture. TV, washer and dishwasher are off for the whole session (the rule from 25 November).
-- **Sensor (mount tag `fan-box-top`).** Taped flat on the top face of the black switch box on the rear guard, as close to the motor side as it fits. The box is screwed to the rear guard next to the motor bracket, outside the guard, and reachable without opening anything.
+- **Sensor (mount tag `fan-box-top`).** See `docs/img/floor_fan_sensor_placement.jpg`. Taped flat on the top face of the black switch box on the rear guard, as close to the motor side as it fits. The box is screwed to the rear guard next to the motor bracket, outside the guard, and reachable without opening anything.
   - Put electrical tape under the board.
   - Tape the board down with clear tape over the top, as on the pad.
   - Draw the board's outline on the box with a marker, so each remount goes back to the same spot.
