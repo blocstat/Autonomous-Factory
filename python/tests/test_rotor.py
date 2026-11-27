@@ -85,3 +85,15 @@ def test_spreads_and_bad_data_left_out():
     assert out["speed_range_pct"] < 0.5
     assert 1.0 <= out["one_x_g_y"] < 1.2
     assert np.isnan(spread([1.0]))
+
+
+def test_warmup_skips_pieces_with_a_gap():
+    g = rotor_signal(21.0, seconds=180.0, seed=6)
+    index = np.arange(g.shape[0])
+    lost = slice(int(65 * RATE), int(66.5 * RATE))  # 1.5 s lost in the third piece
+    keep = np.ones(g.shape[0], bool)
+    keep[lost] = False
+    pieces, _ = warmup(g[keep], RATE, index[keep])
+    starts = [p.start_s for p in pieces]
+    assert 60.0 not in starts and len(pieces) == 5
+    assert starts == [0.0, 30.0, 90.0, 120.0, 150.0]

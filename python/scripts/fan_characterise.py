@@ -73,7 +73,7 @@ def main(argv=None) -> int:
             print(f"    {LABELS[key]:>15}: x {_ug(vals[0])}  y {_ug(vals[1])}  z {_ug(vals[2])}")
         print(f"    kurtosis z {m.kurtosis_z:.1f}{bump}{flag}")
         if condition == "warmup":
-            pieces, settled = warmup(g, rate)
+            pieces, settled = warmup(g, rate, loaded.index)
             print("    warm-up, 30 s pieces: start s / speed Hz / 1x y ug/rtHz")
             for p in pieces:
                 print(f"      {p.start_s:5.0f}  {p.speed_hz:6.2f}  {_ug(p.one_x_g[1])}")

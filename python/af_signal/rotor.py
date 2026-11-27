@@ -130,12 +130,25 @@ class WarmupPiece:
     one_x_g: tuple[float, float, float]
 
 
-def warmup(g: np.ndarray, rate_hz: float) -> tuple[list[WarmupPiece], float | None]:
-    """Pieces of WARMUP_PIECE_S and the settled time (s), or None if it never settles."""
+def warmup(g: np.ndarray, rate_hz: float,
+           index: np.ndarray | None = None) -> tuple[list[WarmupPiece], float | None]:
+    """Pieces of WARMUP_PIECE_S and the settled time (s), or None if it never settles.
+
+    ``index`` is the file's set number per row. With it, pieces are cut by set
+    number (time since the stream started), and a piece holding a gap (missing
+    sets) is left out, so a data-path loss never splices two moments together.
+    """
     piece = int(round(WARMUP_PIECE_S * rate_hz))
+    if index is None:
+        index = np.arange(g.shape[0])
+    index = np.asarray(index, dtype=np.int64)
     pieces: list[WarmupPiece] = []
-    for i in range(g.shape[0] // piece):
-        chunk = g[i * piece : (i + 1) * piece]
+    for i in range(int(index[-1] - index[0] + 1) // piece):
+        lo, hi = index[0] + i * piece, index[0] + (i + 1) * piece
+        rows = np.flatnonzero((index >= lo) & (index < hi))
+        if rows.size != piece or np.any(np.diff(index[rows]) != 1):
+            continue  # gap in this piece
+        chunk = g[rows]
         if chunk.shape[0] - int(round(SETTLE_S * rate_hz)) < NPERSEG:
             break
         freqs, asd = spectrum(chunk, rate_hz)
