@@ -104,7 +104,7 @@ These are measures only, with no pass mark. The spectrum is computed as in `af_s
 | **Warm-up** | f₀ and the 1× level in each 30 s piece of block 2. *Settled* means f₀ stays within 0.5 % of its final value for 2 minutes. |
 | **Spreads** | For each measure: max ÷ min within each block, and f₀'s range in %. Three numbers matter most: **repeat spread** (blocks 3 and 6, nothing touched), **remount spread** (block 7) and **restart spread** (block 8). |
 
-These measures need a small helper script for a single rotor; the pad script assumes 9 blades and an 18–32 Hz range. I will add it, with synthetic known-answer tests, **before** the session, and it will compute exactly the definitions above.
+The code is `python/af_signal/rotor.py` with `python/scripts/fan_characterise.py`, written before the session. The pad script assumed 9 blades and an 18–32 Hz range, so it could not be reused as is.
 
 ## What session 1 delivers
 
@@ -121,6 +121,14 @@ From that, Rami picks session 2's measure and pass mark before session 2.
 - **Known, safe change:** a piece of stiff cardboard taped flat on the **outside** of the rear guard, covering about a third of the intake. It changes the airflow and the load on the motor, without touching the rotor or opening anything.
 - **Protocol:** baseline / cardboard / off / sham restart / cardboard / off, as on 25 November, keeping the sham block.
 - **Rule shape:** compare only captures whose speed is within a tolerance set from session 1 (probably about 1 %). A change counts only if it is larger than the largest of the repeat, remount and restart spreads.
+
+## Running the measures
+
+```bash
+cd autonomous-factory
+python python/scripts/fan_characterise.py data/measured/adxl355/raw/<date>-*_fan-box-top_*.csv
+cd python && python -m pytest -q tests/test_rotor.py   # synthetic known-answer tests
+```
 
 ## Acceptance
 
