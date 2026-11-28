@@ -69,7 +69,9 @@ The 1× line on y is about 105,000 µg/√Hz at setting 2 (19.9 Hz), against abo
 
 Found after the data, so not evidence: the tap test (fan off) shows a y peak at 18.6 Hz that the x and z axes don't show. The stand probably has a y resonance near 19–20 Hz, which setting 2 sits close to. This is exactly why the advice says to compare only at matching speeds.
 
-## What this means for session 2 (Rami decides before session 2)
+## What this means for session 2
+
+The rule chosen from these numbers is in `docs/PHASE1_FLOOR_FAN_SESSION2_PREREG.md`: 10–1000 Hz RMS on y, pass mark 1.25×, speed within ±1 %.
 
 The session 2 change is cardboard on the outside of the rear guard. To count as detected, it must move a measure by more than the largest spread above, with captures compared only at a matching speed. From today's numbers:
 
@@ -87,7 +89,7 @@ Two points to settle first:
 
 ## Files
 
-29 captures in `data/measured/adxl355/raw/20261127-*_fan-box-top_*` on Rami's Mac, plus the output of `fan_characterise.py`. Not yet in the repository: see the PR for when they are added.
+28 captures in `data/measured/adxl355/raw/20261127-*_fan-box-top_*`. The four warm-up files over 5 MB are stored gzipped (`.csv.gz`); the loader reads them directly. Re-running the script below on these files gives the numbers above.
 
 ## Reproduce
 
