@@ -20,6 +20,7 @@ Taping stiff cardboard flat on the **outside** of the rear guard, over about a t
 
 - Same place (taped feet), same mount `fan-box-top` on the drawn outline. Same USB cable as the end of session 1.
 - TV, washer and dishwasher off for the whole session. Nobody walking near the fan during a capture. Guitar away.
+- **Cardboard placement:** see `docs/img/floor_fan_session2_cardboard.jpg`. Flat on the outside of the rear guard, over the bottom third of the intake. Its top edge goes just below the motor's bottom screws. Tape it on all four edges, and keep it clear of the switch box, the knob, the cord and the sensor wires. Mark its corners on the guard with tape, so round 2 goes back to the same place.
 - Cardboard cut and tape strips ready before the fan starts, so each swap is quick.
 - Fan cold: not run for 30 minutes before.
 - Knob at **3** for every running capture.
