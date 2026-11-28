@@ -93,5 +93,5 @@ Two points to settle first:
 
 ```bash
 cd autonomous-factory
-python python/scripts/fan_characterise.py data/measured/adxl355/raw/20261127-*_fan-box-top_*.csv
+python python/scripts/fan_characterise.py data/measured/adxl355/raw/20261127-*_fan-box-top_*
 ```
