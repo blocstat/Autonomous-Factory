@@ -116,7 +116,7 @@ A short results note with:
 
 From that, Rami picks session 2's measure and pass mark before session 2.
 
-## Session 2 (outline only, not pre-registered yet)
+## Session 2 (outline; the pre-registered version is `docs/PHASE1_FLOOR_FAN_SESSION2_PREREG.md`)
 
 - **Known, safe change:** a piece of stiff cardboard taped flat on the **outside** of the rear guard, covering about a third of the intake. It changes the airflow and the load on the motor, without touching the rotor or opening anything.
 - **Protocol:** baseline / cardboard / off / sham restart / cardboard / off, as on 25 November, keeping the sham block.
