@@ -1,6 +1,6 @@
 # Floor fan, session 1: learn the fan before judging any change
 
-**Status:** plan only. Nothing here has been measured. Written 27 November 2026, from Rami's photos of the fan.
+**Status:** written 27 November 2026, from Rami's photos of the fan, before any data. Session 1 was run the same day: results in `docs/PHASE1_FLOOR_FAN_RESULTS_2026-11-27.md`.
 **Test object:** a household 12" floor fan. It is a stand-in until a real machine is available. A result here says what this sensor can see on this fan; it is **not** evidence of fault detection or predictive maintenance on machines.
 **Time needed:** about 1 hour 10 minutes.
 
